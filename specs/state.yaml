@@ -1,7 +1,7 @@
-active_flow: project # fresh start — rebuilding from website/ scaffold
+active_flow: build_epic # building e01 via build-epic cycle
 workflow_mode: interactive # human checkpoint per step (not yolo)
 active_epic_id: e01
-active_story_id: null
+active_story_id: e01s01
 completed_epic: false
 project_cycle:
   current_phase: build # discover → elaborate → plan → build → deploy → support
@@ -11,10 +11,10 @@ project_cycle:
     - 3 # plan
   next_skill: build-epic
 epic_cycle:
-  current_step: 1
-  next_skill: build-epic
-  story_bcps: 6
-  completed_steps: []
+  current_step: 2 # plan-work done for e01s01; next: kickoff-branch (step 3)
+  next_skill: kickoff-branch
+  story_bcps: 1 # e01s01 is 1 BCP
+  completed_steps: [1, 2] # survey-context, plan-work
   fast_mode: false
   audit_result: null
 stack:
