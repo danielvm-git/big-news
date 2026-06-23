@@ -26,7 +26,8 @@ steps:
       Write website/astro.config.mjs: output:'server'; adapter node({mode:'standalone'});
       integrations [react()]; vite.plugins [tailwindcss()];
       i18n { defaultLocale:'en', locales:['en','pt-br'], routing:{ prefixDefaultLocale:false } }.
-    verify: 'grep -q ''output: "server"'' website/astro.config.mjs && grep -q ''prefixDefaultLocale: false'' website/astro.config.mjs && grep -q "defaultLocale: ''en''" website/astro.config.mjs'
+    # Project Prettier style is singleQuote:true — config uses single quotes.
+    verify: 'grep -q "output: ''server''" website/astro.config.mjs && grep -q ''prefixDefaultLocale: false'' website/astro.config.mjs && grep -q "defaultLocale: ''en''" website/astro.config.mjs'
 
   - id: 5
     do: "Port locale.ts verbatim (locale-agnostic) to website/src/lib/locale.ts."

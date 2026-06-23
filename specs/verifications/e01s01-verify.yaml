@@ -1,0 +1,55 @@
+story_id: e01s01
+title: "Initialize Astro 5+ project with i18n"
+verified_at: "2026-06-22T22:41:00Z"
+verifier: verify-work
+branch: e01s01-init-astro-i18n
+worktree: /Users/danielvm/Developer/e01s01-init-astro-i18n
+phases:
+  pre_uat_verify_validation:
+    passed: true
+    note: >
+      Task 4 verify pattern corrected: project Prettier style is singleQuote:true,
+      so astro.config.mjs uses output:'server' (single quotes). Updated tasks.yaml
+      grep from double-quote to single-quote pattern. All 9 grep-verifies pass.
+  smoke:
+    passed: true
+    command: "node ./dist/server/entry.mjs (HOST=127.0.0.1 PORT=4399)"
+    note: 'Cold-start SSR boot via @astrojs/node — HTTP 200, renders <html lang="en">.'
+  build:
+    passed: true
+    command: "npm run build"
+    note: 'output: "server", adapter: @astrojs/node, server built in ~0.7s'
+  typecheck:
+    passed: true
+    command: "npm run typecheck"
+    note: "astro check — 0 errors, 0 warnings, 0 hints (12 files)"
+  lint:
+    passed: true
+    command: "npm run format:check"
+    note: "Prettier — all matched files use code style (after format normalization)"
+  tests:
+    passed: true
+    command: "npm run test:unit"
+    note: "22 tests passed (4 files): locale(14), article-locales(5), categories(2), sanity(1)"
+  manual:
+    steps:
+      - step: "npm run build (SSR)"
+        expected: "server build in dist/"
+        actual: "dist/server/entry.mjs produced; build Complete"
+        passed: true
+      - step: "cold-start boot + curl /"
+        expected: "SSR server serves default-locale homepage"
+        actual: 'HTTP 200, <html lang="en">, data-testid locale=en'
+        passed: true
+      - step: "cold-start boot + curl /pt-br/"
+        expected: "pt-br route resolves via i18n routing"
+        actual: 'HTTP 200, <html lang="pt-br">, data-testid locale=pt-br'
+        passed: true
+      - step: "i18n config present and exercised"
+        expected: "defaultLocale en, locales [en,pt-br], prefixDefaultLocale false"
+        actual: "confirmed in astro.config.mjs; both locales resolve at runtime via LocaleSmoke"
+        passed: true
+  gaps:
+    closed: true
+    deferred:
+      - "Full localized [...locale]/ content tree (articles, categories, etc.) → e04. e01s01 ships only the i18n config + a minimal LocaleSmoke proving both v1 locales resolve."
