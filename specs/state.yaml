@@ -1,7 +1,7 @@
 active_flow: build_epic # building e01 via build-epic cycle
 workflow_mode: interactive # human checkpoint per step (not yolo)
 active_epic_id: e01
-active_story_id: e01s05 # test infrastructure (real Postgres + adapter mock)
+active_story_id: null # e01s05 landed on main (squash-merge); pick next e01 story
 completed_epic: false
 project_cycle:
   current_phase: build # discover → elaborate → plan → build → deploy → support
@@ -11,13 +11,14 @@ project_cycle:
     - 3 # plan
   next_skill: build-epic
 epic_cycle:
-  current_step: 8 # release-branch
-  next_skill: release-branch
-  story_bcps: 1
-  completed_steps: [1, 2, 3, 4, 5, 6]
+  # e01s05 complete (all 8 steps); reset for next e01 story.
+  current_step: 1 # survey-context for next story
+  next_skill: survey-context
+  story_bcps: null
+  completed_steps: []
   fast_mode: false
-  audit_result: pass
-  last_story_done: e01s01 # squash-merged to main as 731df41
+  audit_result: null
+  last_story_done: e01s05 # merged to main as 75bf3aa + 3c6506e
 stack:
   package_manager: npm # pure npm — package-lock.json
   site_dir: website # Astro site lives here
@@ -27,12 +28,12 @@ release:
   current_version: 0.1.0 # website/package.json
   last_tag: null
   last_publish: null
-  ci_verified: true # first CI run green on recreated repo
+  ci_verified: true # CI green for e01s05 integration test fix
 git:
   branch: main
   repo: danielvm-git/big-news
   default_branch: main
-  hash: "14cfe64"
+  hash: "3c6506e"
   pushed: true
   contributors: "danielvm-git only (no Claude attribution)"
   protection: "force-push + deletion blocked; linear history required; direct commits (no PR gate)"
@@ -41,10 +42,9 @@ upstream:
   relicense: "MIT relicensing authorized — maintainer owns upstream; upstream ships no LICENSE"
 handoff:
   last_step_completed: >
-    Repo recreated clean after old one was deleted. Single foundation commit
-    authored solely by danielvm-git (NO Co-Authored-By: Claude — that trailer had
-    added "claude" to contributors). First CI run green; contributors = danielvm-git
-    only; branch protection re-applied. Pure-npm Astro site in website/ (v0.1.0),
-    Husky pre-push gate mirrors CI, commitlint + lint-staged hooks, pinned CI
-    workflow. Integration/E2E CI lanes dormant until e02/e04 add code to test.
-  next_action: "continue e01 feature stories on website/: i18n routing, React island, Tailwind v4, structured logger + zod validation (ADR-0018/0015), BigBase footer"
+    e01s05 (test infrastructure) released to main. Setup vitest with unit + integration
+    projects (website/vitest.config.ts), disposable Postgres via docker-compose.test.yml,
+    StorageAdapter interface + MockAdapter. CI failed initially (missing @types/node for
+    process.env in integration test) and was fixed with a follow-up commit. All gates pass:
+    typecheck (0 errors), format, unit tests (23 pass), build, CI green.
+  next_action: "pick next e01 story — e01s06 (observability & zod validation) or e01s07 (BigBase footer)"
