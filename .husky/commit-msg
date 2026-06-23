@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Enforce Conventional Commits so the history stays clean and machine-readable.
+ROOT="$(git rev-parse --show-toplevel)"
+"$ROOT/node_modules/.bin/commitlint" --edit "$1"

@@ -1,0 +1,29 @@
+# Discover-phase workflows (orchestrate-project / run-planning checklist)
+workflows:
+  survey-context:
+    status: done # tech-stack.md derived from astrobiologia source
+    path: survey-context/SKILL.md
+  map-codebase:
+    status: done # upstream mapped via opensrc clone of astrobiologia
+    path: map-codebase/SKILL.md
+  scope-work:
+    status: done # specs/product/SCOPE_LATEST.yaml
+    path: scope-work/SKILL.md
+  research-first:
+    status: done # driver/storage/auth/i18n decisions verified vs source + ADRs
+    path: research-first/SKILL.md
+  elaborate-spec:
+    status: optional
+    path: elaborate-spec/SKILL.md
+  plan-release:
+    status: done # specs/release-plan.yaml
+    path: plan-release/SKILL.md
+  slice-tasks:
+    status: todo # NEXT — expand each epic into epics/eNN-*/ capsules
+    path: slice-tasks/SKILL.md
+  plan-work:
+    status: todo # after slice-tasks, per epic
+    path: plan-work/SKILL.md
+  assess-impact:
+    status: optional
+    path: assess-impact/SKILL.md

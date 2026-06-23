@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+# Pre-push gate — the core "CI never goes red" guarantee.
+# Nothing reaches GitHub unless the CI fast lane passes locally first.
+# Mirrors .github/workflows/ci.yml fast jobs: typecheck, format:check, unit, build.
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+# Guard: local Node major must match .nvmrc so local == CI.
+want="$(tr -dc '0-9' <"$ROOT/.nvmrc" | cut -c1-2)"
+have="$(node -p 'process.versions.node.split(".")[0]')"
+if [ -n "$want" ] && [ "$want" != "$have" ]; then
+  echo "✗ pre-push: Node major $have != .nvmrc ($want). Run 'nvm use' (or mise) so local matches CI." >&2
+  exit 1
+fi
+
+echo "▶ pre-push gate: running preflight (typecheck → format:check → unit → build)…"
+cd "$ROOT/website"
+npm run preflight
+echo "✓ pre-push gate passed — safe to push."

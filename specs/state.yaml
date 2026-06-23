@@ -1,0 +1,49 @@
+active_flow: project # fresh start — rebuilding from website/ scaffold
+workflow_mode: interactive # human checkpoint per step (not yolo)
+active_epic_id: e01
+active_story_id: null
+completed_epic: false
+project_cycle:
+  current_phase: build # discover → elaborate → plan → build → deploy → support
+  completed_phases:
+    - 1 # discover
+    - 2 # elaborate
+    - 3 # plan
+  next_skill: build-epic
+epic_cycle:
+  current_step: 1
+  next_skill: build-epic
+  story_bcps: 6
+  completed_steps: []
+  fast_mode: false
+  audit_result: null
+stack:
+  package_manager: npm # pure npm — package-lock.json
+  site_dir: website # Astro site lives here
+  versioning: manual # bumped by hand in website/package.json (no semantic-release)
+release:
+  target_version: 1.0.0
+  current_version: 0.1.0 # website/package.json
+  last_tag: null
+  last_publish: null
+  ci_verified: false # repo being recreated clean (no Claude attribution); re-verify after push
+git:
+  branch: main
+  repo: danielvm-git/big-news
+  default_branch: main
+  hash: null # set after push to recreated repo
+  pushed: false # awaiting repo recreation (old repo had Claude co-author; redoing clean)
+  protection: "to re-apply after push: force-push + deletion blocked; linear history; direct commits (no PR gate)"
+upstream:
+  source: danielvm-git/astrobiologia
+  relicense: "MIT relicensing authorized — maintainer owns upstream; upstream ships no LICENSE"
+handoff:
+  last_step_completed: >
+    Rebuilt local git history as a SINGLE clean commit authored solely by
+    danielvm-git (no Co-Authored-By: Claude — that trailer had added "claude" to
+    the GitHub contributors list). Foundation intact: pure-npm Astro site in
+    website/ (v0.1.0), Husky pre-push gate mirrors CI (typecheck, format:check,
+    unit, build), commitlint + lint-staged hooks, pinned CI workflow. Awaiting old
+    repo deletion (token lacks delete_repo scope; force-push blocked by git guard)
+    before recreating clean and pushing.
+  next_action: "continue e01 feature stories on website/: i18n routing, React island, Tailwind v4, structured logger + zod validation (ADR-0018/0015), BigBase footer"

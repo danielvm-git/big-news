@@ -1,0 +1,102 @@
+version: "1"
+core_value: "An open-source, self-hostable PostgreSQL news CMS anyone can deploy in minutes — full editorial workflow, your choice of Postgres provider and host."
+
+summary: |
+  big-news is an open-source news CMS (Astro 5+ / PostgreSQL) ported from the
+  Appwrite-backed danielvm-git/astrobiologia. It ships a complete editorial workflow
+  (article CRUD, categories, tags, featured images, multilingual i18n, admin panel,
+  full-text search) behind a thin storage-adapter seam, deployable to Node/VPS,
+  Docker, Netlify, Vercel, Render, or Railway against BigBase / Neon / Supabase /
+  stand-alone Postgres. A live demo runs at news.bigbase.click on BigBase.
+
+  LANGUAGE POLICY (ADR-0020): the project is English — all code, identifiers,
+  comments, route paths, default strings, logs, and documentation are English. The
+  product is English-canonical (defaultLocale "en"); v1 ships [en, pt-br] to prove
+  the i18n structure; es/ja/nl/zh are deferred post-v1. Route paths are English
+  (/articles, /categories, /search, /about, /contact, /privacy).
+
+  Delivered with the bigpowers lifecycle (Prototype → Design → Build → Deploy →
+  Support) using Claude Code = Memory + Tools + Subagents + Skills + MCP. Prototype
+  and Design are inherited from astrobiologia (visual parity, not re-design); Build
+  runs as orchestrator + parallel subagents; Support is a first-class phase.
+
+in_scope:
+  - id: fr-01
+    title: "Project scaffold + foundational i18n routing, toolchain, CI, observability, validation"
+    epic: e01
+  - id: fr-02
+    title: "PostgreSQL data layer — adapter seam, postgres.js, versioned migrations, article/settings/S3 adapters, search, sanitizer"
+    epic: e02
+  - id: fr-03
+    title: "Hardened authentication — seed-only admin, argon2, hardened cookies, CSRF, rate-limit, sessions"
+    epic: e03
+  - id: fr-04
+    title: "Public pages under [...locale] — home, listing, detail, category, search, static, RSS/sitemap/robots, error pages"
+    epic: e04
+  - id: fr-05
+    title: "Admin panel — login, dashboard, article list, TipTap editor (+ optional DeepL), S3 upload, settings/account"
+    epic: e05
+  - id: fr-06
+    title: "i18n polish — language switcher, localized UI strings"
+    epic: e06
+  - id: fr-07
+    title: "Open-source polish + health endpoints + security hardening"
+    epic: e07
+  - id: fr-08
+    title: "Demo deploy — BigBase (least-privilege), seed, /security-review gate, health-gate + rollback, v1.0.0"
+    epic: e08
+  - id: fr-09
+    title: "Support — uptime/alerting, incident runbook, maintenance cadence"
+    epic: e09
+
+out_of_scope:
+  - item: "Multi-tenancy"
+    why: "too risky / complex for v1 — each instance manages one site"
+  - item: "Social login (GitHub, Google)"
+    why: "deferred — email/password only; community can extend"
+  - item: "Comments / discussion"
+    why: "not core CMS — community plugin"
+  - item: "Newsletter / subscription"
+    why: "not core — third-party integration"
+  - item: "Podcast / video management"
+    why: "out of domain — text-first news CMS"
+  - item: "Mobile app / PWA"
+    why: "deferred — web-first; Astro can add PWA later"
+  - item: "Plugin system"
+    why: "premature abstraction — v1 ships one (Postgres) backend"
+  - item: "Real-time (SSE, WebSocket)"
+    why: "not needed for a news CMS"
+  - item: "Metrics / distributed tracing"
+    why: "deferred — v1 observability is structured logs + health probes (ADR-0018)"
+  - item: "Locales es / ja / nl / zh"
+    why: "deferred to post-v1 — i18n structure is proven by [en, pt-br] in v1; adding more is config + translation files, no structural work (ADR-0020)"
+
+constraints:
+  - "Astro 5+ only (no v4 compat), ESM-only, Node 22+"
+  - "Single package (no monorepo) — simpler for community contributors"
+  - "PostgreSQL only via postgres.js (ADR-0001); migrations via node-pg-migrate (ADR-0002)"
+  - "S3-compatible storage by default; local FS dev-only (ADR-0006)"
+  - "No public registration — seed/CLI admin only (ADR-0003)"
+  - "Zero secrets in repo; all config via env"
+  - "MIT license; public repo danielvm-git/big-news"
+  - "Conventional Commits (commitlint + Husky); pure npm; manual versioning starting at 0.1.0"
+  - "Language policy (ADR-0020): English project — code, identifiers, comments, route paths, default strings, logs, docs all English; product i18n is English-canonical, v1 = [en, pt-br]"
+
+success_criteria:
+  - "Live demo at news.bigbase.click on a Postgres backend"
+  - "Seeded admin can login → create → publish → view → edit → logout (no public register route)"
+  - "Unauthenticated /admin/* redirect to /admin/login; /api/admin/* return 401"
+  - "Functional parity with astrobiologia (English routes/strings) plus RSS/sitemap/robots and sanitized content"
+  - "Site serves correctly in both en (default) and pt-br via [...locale] routing, proving the i18n structure end to end"
+  - "No Portuguese (or other non-English) text in code, identifiers, comments, route paths, or docs — only in pt-br translation/content files"
+  - "README documents install + deploy for BigBase/Neon/Supabase/stand-alone and Node/Docker/Netlify/Vercel/Render/Railway"
+  - "All Vitest + Playwright (unit + integration + E2E) pass in CI"
+  - "/security-review clean and runtime credentials least-privilege before deploy"
+  - "Version tag v1.0.0 created when MVP complete"
+
+references:
+  release_plan: specs/release-plan.yaml
+  tech_stack: specs/tech-architecture/tech-stack.md
+  adr: specs/adr/
+  slicing_source: specs/archive/RELEASE-PLAN-detailed.md
+  upstream: github.com/danielvm-git/astrobiologia

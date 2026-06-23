@@ -1,0 +1,91 @@
+release:
+  version: "1.0.0"
+  codename: "Big News"
+  status: planning
+  versioning:
+    tool: manual # version bumped by hand in website/package.json (no semantic-release)
+    package_manager: npm # pure npm — package-lock.json
+    site_dir: website # Astro site lives here
+    start_version: "0.1.0" # first release
+  bump_hint: minor # 0.1.0 → 0.2.0 → ... → 1.0.0
+  notes: |
+    Ported from danielvm-git/astrobiologia (Astro 5+/Appwrite → Astro 5+/PostgreSQL).
+    Pure npm; the Astro site lives in website/. Versioning is manual in
+    website/package.json, starting at 0.1.0.
+    Epics listed by WSJF desc; execution is dependency-constrained (see dependency_order).
+    Detailed stories/tasks/Gherkin live in specs/archive/RELEASE-PLAN-detailed.md — run
+    slice-tasks + plan-work per epic to expand each capsule_dir before building.
+
+epics:
+  # ── BACKLOG v1.0.0 — sorted by WSJF descending ──
+  - id: e01
+    title: "Foundation & Scaffold (Astro 5 + i18n + toolchain + CI + observability + validation)"
+    wsjf: 9.0
+    bcps: 6
+    capsule_dir: epics/e01-foundation-scaffold
+    note: "i18n routing, structured logging (ADR-0018), zod validation (ADR-0015), BigBase-style footer (Story 1.7) are foundational here; site lives in website/ (npm); manual versioning starts at v0.1.0; repo goes public at end of epic"
+  - id: e08
+    title: "Demo Deploy (BigBase least-privilege, seed, /security-review gate, rollback, v1.0.0)"
+    wsjf: 8.0
+    bcps: 3
+    capsule_dir: epics/e08-demo-deploy
+    note: "final integration; depends on e02-e07; blocked by e07 security-hardening gate + /security-review (ADR-0017)"
+  - id: e02
+    title: "PostgreSQL Data Layer (adapter seam, postgres.js, migrations, article/settings/S3, search, sanitizer)"
+    wsjf: 6.0
+    bcps: 8
+    capsule_dir: epics/e02-postgres-data-layer
+    note: "blocks e03/e04/e05; ADR-0001/0002/0004/0005/0006"
+  - id: e03
+    title: "Authentication (hardened, seed-only admin)"
+    wsjf: 4.5
+    bcps: 4
+    capsule_dir: epics/e03-authentication
+    note: "after e02; ADR-0003/0012/0013"
+  - id: e07
+    title: "OSS Polish + Health + Security Hardening"
+    wsjf: 3.5
+    bcps: 6
+    capsule_dir: epics/e07-oss-polish-security
+    note: "LICENSE/CONTRIBUTING done in e01; security-hardening story is a HARD GATE before e08; ADR-0009/0010/0011/0014/0015/0016"
+  - id: e04
+    title: "Public Pages ([...locale], RSS/sitemap/robots, error pages)"
+    wsjf: 3.0
+    bcps: 7
+    capsule_dir: epics/e04-public-pages
+    note: "after e02; parallel with e05 (subagent A)"
+  - id: e05
+    title: "Admin Panel (editor, optional DeepL, S3 upload, settings/account)"
+    wsjf: 3.0
+    bcps: 6
+    capsule_dir: epics/e05-admin-panel
+    note: "after e03; parallel with e04 (subagent B); ADR-0008"
+  - id: e06
+    title: "i18n Polish (switcher, localized UI strings)"
+    wsjf: 2.5
+    bcps: 2
+    capsule_dir: epics/e06-i18n-polish
+    note: "routing already foundational in e01; parallel lane (subagent C)"
+  - id: e09
+    title: "Support (uptime/alerting, runbook, maintenance cadence)"
+    wsjf: 2.0
+    bcps: 3
+    capsule_dir: epics/e09-support
+    note: "post-launch lifecycle phase"
+
+# Execution respects dependencies; WSJF orders only WITHIN the DAG.
+dependency_order:
+  - e01
+  - e02
+  - e03
+  - [e04, e05, e06, e07] # build wave — orchestrator + parallel subagents
+  - e08 # integration + deploy (gated)
+  - e09 # support
+
+build_orchestration:
+  model: "orchestrator + parallel subagents (conference 'build all three in parallel')"
+  subagents:
+    - { label: "public-site", epic: e04 }
+    - { label: "admin-panel", epic: e05 }
+    - { label: "i18n-polish", epic: e06 }
+  integrator: "orchestrator owns e08 integration + /security-review gate"

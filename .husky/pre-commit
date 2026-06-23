@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Format staged files before they enter a commit (keeps history tidy & diffs clean).
+ROOT="$(git rev-parse --show-toplevel)"
+"$ROOT/node_modules/.bin/lint-staged" --cwd "$ROOT"

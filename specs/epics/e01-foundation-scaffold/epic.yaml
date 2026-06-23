@@ -1,0 +1,271 @@
+# Epic e01: Foundation & Scaffold
+# Astro 5 + i18n + toolchain + CI + observability + validation
+# Site lives in website/ (pure npm). Versioning is manual, starting at 0.1.0.
+epic_id: e01
+title: "Foundation & Scaffold (Astro 5 + i18n + toolchain + CI + observability + validation)"
+wsjf: 9.0
+bcps: 6
+status: planned
+note: >
+  i18n routing, structured logging (ADR-0018), zod validation (ADR-0015),
+  BigBase-style footer (Story 1.7) are foundational here; the Astro site lives
+  in website/ (pure npm); versioning is manual in website/package.json starting
+  at 0.1.0; repo goes public at end of epic
+
+stories:
+  - id: e01s01
+    title: "Initialize Astro 5+ project with i18n"
+    status: planned
+    bcps: 1
+    acceptance: |
+      Feature: Project Scaffold
+        Scenario: Dev server starts
+          Given an Astro 5+ project with TypeScript, React, Tailwind CSS v4
+          When I run `npm run dev`
+          Then the dev server starts on localhost:4321
+        Scenario: SSR build succeeds
+          When I run `npm run build`
+          Then it produces a server build in `dist/`
+        Scenario: TypeScript compiles
+          When I run `npm run typecheck`
+          Then no type errors are reported
+        Scenario: i18n routing is configured
+          Given astro.config.mjs
+          Then i18n.defaultLocale is "en" with v1 locales [en, pt-br]
+          And routing.prefixDefaultLocale is false
+    tasks:
+      - id: e01s01t01
+        title: "Scaffold Astro into website/ via npm create astro@latest (single package, not monorepo)"
+        verify: 'test -f website/package.json && grep -q ''"astro"'' website/package.json'
+      - id: e01s01t02
+        title: "Add React via npx astro add react"
+        verify: "grep -q '@astrojs/react' website/package.json"
+      - id: e01s01t03
+        title: "Add Tailwind v4 via @tailwindcss/vite"
+        verify: "grep -q '@tailwindcss/vite' website/package.json"
+      - id: e01s01t04
+        title: "Configure website/astro.config.mjs: output:server, @astrojs/node standalone, i18n block (defaultLocale:en, locales [en,pt-br], prefixDefaultLocale:false)"
+        verify: 'grep -q ''i18n'' website/astro.config.mjs && grep -q ''output: "server"'' website/astro.config.mjs'
+      - id: e01s01t05
+        title: "Port locale helpers: website/src/lib/locale.ts, website/src/lib/article-locales.ts, website/src/lib/categories.ts"
+        verify: "grep -q 'normalizeLocaleTag' website/src/lib/locale.ts && grep -q 'ARTICLE_LOCALES' website/src/lib/article-locales.ts"
+      - id: e01s01t06
+        title: "Strict website/tsconfig.json; website/src/styles/main.css with Tailwind"
+        verify: "grep -q 'strict' website/tsconfig.json && test -f website/src/styles/main.css"
+    gate: "npm run typecheck && npm run build"
+
+  - id: e01s02
+    title: "Development toolchain (Husky, commitlint, Prettier)"
+    status: planned
+    bcps: 1
+    acceptance: |
+      Feature: Dev Toolchain
+        Scenario: Commit message is validated
+          When I commit with a non-conventional message
+          Then the commit is rejected
+        Scenario: Prettier formats code
+          When I run `npm run format`
+          Then all files are formatted
+        Scenario: Version is set manually
+          Given website/package.json
+          Then version is "0.1.0" (manual versioning — no semantic-release)
+    tasks:
+      - id: e01s02t01
+        title: "Install devDeps: husky, lint-staged, prettier, commitlint"
+        verify: 'grep -q ''"husky"'' website/package.json && grep -q ''"lint-staged"'' website/package.json && grep -q ''"@commitlint/cli"'' website/package.json'
+      - id: e01s02t02
+        title: "Run hook-commits skill: Husky + lint-staged + pre-commit hooks"
+        verify: "test -f website/.husky/pre-commit"
+      - id: e01s02t03
+        title: "Configure commitlint (conventional config)"
+        verify: "test -f website/commitlint.config.js"
+      - id: e01s02t04
+        title: "Configure Prettier"
+        verify: "test -f website/.prettierrc"
+      - id: e01s02t06
+        title: "Set website/package.json version to 0.1.0"
+        verify: 'grep -q ''"version": "0.1.0"'' website/package.json'
+      - id: e01s02t07
+        title: "Set engines.node to >=22"
+        verify: 'grep -q ''"node": ">=22"'' website/package.json'
+      - id: e01s02t08
+        title: "Add package.json scripts: format, typecheck, test:unit, test:integration, test:e2e, preflight"
+        verify: 'grep -q ''"preflight"'' website/package.json && grep -q ''"test:integration"'' website/package.json'
+      - id: e01s02t09
+        title: "Create website/.env.example documenting all env vars: DATABASE_URL, session secret, S3_*, DEEPL_API_KEY, PUBLIC_SITE_URL"
+        verify: "grep -q 'DATABASE_URL' website/.env.example && grep -q 'S3_' website/.env.example"
+      - id: e01s02t10
+        title: "Create website/.gitignore (env, dist, node_modules, uploads)"
+        verify: "grep -q '.env' website/.gitignore"
+    gate: "npm run format:check passes; a non-conventional commit message is rejected by commitlint"
+
+  - id: e01s03
+    title: "Conventions & specs (seed-conventions)"
+    status: planned
+    bcps: 1
+    acceptance: |
+      Feature: Conventions & Specs
+        Scenario: Agent conventions exist
+          Then CLAUDE.md and CONVENTIONS.md exist
+        Scenario: Commands in CLAUDE.md are correct
+          Then they match the actual npm scripts
+        Scenario: tracking state files exist
+          Then specs/state.yaml and specs/execution-status.yaml exist
+    tasks:
+      - id: e01s03t01
+        title: "Run seed-conventions skill to bootstrap CLAUDE.md, CONVENTIONS.md, specs/"
+        verify: "test -f CLAUDE.md && test -f CONVENTIONS.md"
+      - id: e01s03t02
+        title: "Review CLAUDE.md — ensure dev/build/test/typecheck commands match project (npm, run from website/)"
+        verify: "grep -q 'npm run' CLAUDE.md"
+      - id: e01s03t03
+        title: "Review CONVENTIONS.md — ESM-only, Node 22+, npm, adapter pattern, no secrets, sanitize-on-write, English-only (ADR-0020)"
+        verify: "grep -qi 'english' CONVENTIONS.md"
+      - id: e01s03t04
+        title: "Create specs/state.yaml with initial state (bigpowers cockpit)"
+        verify: "grep -q 'active_flow' specs/state.yaml"
+      - id: e01s03t05
+        title: "Create specs/execution-status.yaml for story tracking"
+        verify: "test -f specs/execution-status.yaml"
+      - id: e01s03t06
+        title: "Confirm specs/SCOPE.md, specs/RELEASE-PLAN.md"
+        verify: "test -f specs/SCOPE.md && test -f specs/RELEASE-PLAN.md"
+    gate: "state.yaml is valid YAML; commands in CLAUDE.md run correctly"
+
+  - id: e01s04
+    title: "License, repo, and CI (wire-ci)"
+    status: planned
+    bcps: 1
+    acceptance: |
+      Feature: CI Pipeline
+        Scenario: PR runs the full pyramid
+          Given a PR against main
+          Then CI runs: typecheck, lint, unit, integration (Postgres service), build, E2E
+          And all must pass before merge
+        Scenario: Integration tests have a database
+          Given the CI integration job
+          Then a postgres:16 service container is available at DATABASE_URL
+    tasks:
+      - id: e01s04t01
+        title: "Create LICENSE (MIT) and CONTRIBUTING.md"
+        verify: "grep -q 'MIT' LICENSE && test -f CONTRIBUTING.md"
+      - id: e01s04t02
+        title: "Create public GitHub repo danielvm-git/big-news, push main"
+        verify: "gh repo view danielvm-git/big-news --json visibility -q .visibility | grep -q PUBLIC"
+      - id: e01s04t03
+        title: "Run wire-ci skill to generate .github/workflows/ci.yml (npm, working-directory: website) with Astro + Postgres + Playwright"
+        verify: "grep -q 'postgres' .github/workflows/ci.yml && grep -q 'playwright' .github/workflows/ci.yml"
+      - id: e01s04t04
+        title: "Run wire-ci --validate to check workflow YAML syntax and permissions"
+        verify: "workflow validates"
+      - id: e01s04t05
+        title: "Add integration job with services:postgres:16, DATABASE_URL env"
+        verify: "grep -q 'services:' .github/workflows/ci.yml"
+      - id: e01s04t07
+        title: "Verify Node 22 engine in website/package.json"
+        verify: 'grep -q ''"node": ">=22"'' website/package.json'
+    gate: "A trivial PR turns the full CI matrix green (all 6 jobs)"
+
+  - id: e01s05
+    title: "Test infrastructure (real Postgres + adapter mock)"
+    status: planned
+    bcps: 1
+    acceptance: |
+      Feature: Test Infra
+        Scenario: Integration DB spins up
+          When I run `npm run test:integration`
+          Then a disposable Postgres is available, migrated, and torn down
+        Scenario: Unit tests mock the adapter
+          When I run `npm run test:unit`
+          Then no database connection is required
+    tasks:
+      - id: e01s05t01
+        title: "Create website/docker-compose.test.yml with disposable Postgres 16"
+        verify: "test -f website/docker-compose.test.yml"
+      - id: e01s05t02
+        title: "Create website/src/lib/adapter/__tests__/mock-adapter.ts in-memory StorageAdapter"
+        verify: "grep -q 'StorageAdapter' website/src/lib/adapter/__tests__/mock-adapter.ts"
+      - id: e01s05t03
+        title: "Configure vitest projects: unit (mock) and integration (real DB)"
+        verify: "grep -q 'integration' website/vitest.config.ts || grep -q 'integration' website/vitest.workspace.ts"
+    gate: "npm run test:unit runs with no DB; npm run test:integration migrates a throwaway DB and passes a smoke query"
+
+  - id: e01s06
+    title: "Foundational observability & input-validation primitives (ADR-018, ADR-015)"
+    status: planned
+    bcps: 1
+    acceptance: |
+      Feature: Foundational Logging
+        Scenario: Structured JSON logs with a request id
+          Given a request flows through middleware
+          Then logs are JSON with a correlation/request id, level, route, status, and latency
+        Scenario: Secrets are redacted
+          Given a log call includes a cookie, Authorization header, or DATABASE_URL
+          Then those values are redacted in the output
+        Scenario: Level is configurable
+          Given LOG_LEVEL=warn
+          Then info logs are suppressed
+      Feature: Input Validation Helper
+        Scenario: Invalid body is rejected with 400
+          Given an API route guarded by a zod schema
+          When the body fails the schema
+          Then it returns 400 with a safe, generic error (no internals)
+        Scenario: Valid body is typed
+          When the body passes
+          Then the handler receives a typed, parsed object
+    tasks:
+      - id: e01s06t01
+        title: "Create website/src/lib/logger.ts — structured JSON logger, LOG_LEVEL env, redaction allowlist"
+        verify: "grep -q 'redact' website/src/lib/logger.ts"
+      - id: e01s06t02
+        title: "Wire request-ID assignment + request-completion logging in website/src/middleware/index.ts"
+        verify: "grep -q 'requestId\\|x-request-id' website/src/middleware/index.ts"
+      - id: e01s06t03
+        title: "Create website/src/lib/validation.ts — install zod; export validate(schema, input) + route helper returning 400"
+        verify: "grep -q 'zod' website/package.json && grep -q 'validate' website/src/lib/validation.ts"
+      - id: e01s06t04
+        title: "Add CONVENTIONS.md rules: no console.*; every API route validates via a schema"
+        verify: "grep -q 'validate' CONVENTIONS.md"
+    gate: "npm run test:unit -- src/lib/__tests__/{logger,validation}.test.ts — covers redaction, level filtering, 400-on-invalid, typed-pass"
+
+  - id: e01s07
+    title: "BigBase-style footer (3-column + version bar)"
+    status: planned
+    bcps: 1
+    acceptance: |
+      Feature: BigBase-style Footer
+        Scenario: Footer matches BigBase layout
+          Given the site's footer
+          Then it has a 3-column grid layout with columns: Product, Resources, Community
+          And a bottom bar separated by a border
+        Scenario: Bottom bar shows version
+          Given the build process injects PUBLIC_APP_VERSION from package.json
+          When I view the footer
+          Then it shows "© {year} big-news · MIT License · v{PUBLIC_APP_VERSION}"
+        Scenario: Bottom bar shows built with credit
+          Given the footer
+          Then it shows "Built with BigPowers by danielvm-git" with links
+        Scenario: Version is injected at build time
+          Given the build process
+          Then version comes from import.meta.env.PUBLIC_APP_VERSION
+            (set via Astro Vite define, reads version from website/package.json at build time)
+    tasks:
+      - id: e01s07t01
+        title: "Define CSS variables in website/src/styles/main.css matching BigBase design tokens"
+        verify: "grep -q '--color-fg' website/src/styles/main.css"
+      - id: e01s07t02
+        title: "Create build-time version injection in website/astro.config.mjs using vite.define for PUBLIC_APP_VERSION"
+        verify: "grep -q 'PUBLIC_APP_VERSION' website/astro.config.mjs"
+      - id: e01s07t03
+        title: "Create website/src/components/Footer.astro with BigBase HTML structure (3 columns + bottom bar)"
+        verify: "grep -q 'footer-inner' website/src/components/Footer.astro && grep -q 'footer-bottom' website/src/components/Footer.astro"
+      - id: e01s07t04
+        title: "Add BigBase CSS to website/src/styles/main.css under footer classes"
+        verify: "grep -q '.footer {' website/src/styles/main.css"
+      - id: e01s07t05
+        title: "Apply footer in base layout so it appears on every page"
+        verify: "grep -rq 'Footer' website/src/layouts/"
+      - id: e01s07t06
+        title: "Maintain CHANGELOG.md manually (Keep a Changelog) and link from Resources column"
+        verify: "test -f CHANGELOG.md"
+    gate: "npm run build && npm run preview shows BigBase footer layout with correct version from website/package.json"

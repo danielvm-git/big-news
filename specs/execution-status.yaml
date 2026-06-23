@@ -1,0 +1,12 @@
+# Build-phase status (dashboard right panel). All not-started until slice-tasks/plan-work
+# populate each capsule and develop-tdd ships stories. Stories appear here once sliced.
+development_status:
+  e01: not-started # reset — branch deleted, PR #1 closed; rebuilding on website/ npm app
+  e02: not-started
+  e03: not-started
+  e04: not-started
+  e05: not-started
+  e06: not-started
+  e07: not-started
+  e08: not-started
+  e09: not-started
