@@ -1,7 +1,7 @@
 # Build-phase status (dashboard right panel). All not-started until slice-tasks/plan-work
 # populate each capsule and develop-tdd ships stories. Stories appear here once sliced.
 development_status:
-  e01: not-started # reset — branch deleted, PR #1 closed; rebuilding on website/ npm app
+  e01: in-progress # e01s01 done (Astro 5+ i18n scaffold); s05/s06/s07 remain
   e02: not-started
   e03: not-started
   e04: not-started

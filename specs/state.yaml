@@ -1,7 +1,7 @@
 active_flow: build_epic # building e01 via build-epic cycle
 workflow_mode: interactive # human checkpoint per step (not yolo)
 active_epic_id: e01
-active_story_id: e01s01
+active_story_id: null # e01s01 landed on main (squash 731df41); pick next e01 story
 completed_epic: false
 project_cycle:
   current_phase: build # discover → elaborate → plan → build → deploy → support
@@ -11,12 +11,14 @@ project_cycle:
     - 3 # plan
   next_skill: build-epic
 epic_cycle:
-  current_step: 6 # audit-code PASS; next: commit-message (step 7)
-  next_skill: commit-message
-  story_bcps: 1 # e01s01 is 1 BCP
-  completed_steps: [1, 2, 3, 4, 5, 6] # survey, plan, kickoff, develop-tdd, verify-work, audit-code
+  # e01s01 complete (all 8 steps); reset for next e01 story.
+  current_step: 1 # survey-context for next story
+  next_skill: survey-context
+  story_bcps: null
+  completed_steps: []
   fast_mode: false
-  audit_result: pass
+  audit_result: null
+  last_story_done: e01s01 # squash-merged to main as 731df41
 stack:
   package_manager: npm # pure npm — package-lock.json
   site_dir: website # Astro site lives here
