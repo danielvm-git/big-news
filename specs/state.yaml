@@ -1,7 +1,7 @@
 active_flow: build_epic # building e01 via build-epic cycle
 workflow_mode: interactive # human checkpoint per step (not yolo)
 active_epic_id: e01
-active_story_id: null # e01s05 landed on main (squash-merge); pick next e01 story
+active_story_id: e01s06 # observability & input-validation primitives (ADR-018, ADR-015)
 completed_epic: false
 project_cycle:
   current_phase: build # discover → elaborate → plan → build → deploy → support
@@ -11,11 +11,11 @@ project_cycle:
     - 3 # plan
   next_skill: build-epic
 epic_cycle:
-  # e01s05 complete (all 8 steps); reset for next e01 story.
-  current_step: 1 # survey-context for next story
-  next_skill: survey-context
-  story_bcps: null
-  completed_steps: []
+  # e01s06 (observability & validation) in progress.
+  current_step: 3 # kickoff-branch (survey+plan done)
+  next_skill: kickoff-branch
+  story_bcps: 1 # from epic.yaml e01s06 bcps
+  completed_steps: [1, 2] # survey-context + plan-work (e01s06-tasks.yaml written)
   fast_mode: false
   audit_result: null
   last_story_done: e01s05 # merged to main as 75bf3aa + 3c6506e
