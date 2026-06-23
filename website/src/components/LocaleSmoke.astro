@@ -1,0 +1,22 @@
+---
+// Minimal i18n smoke: renders the locale resolved by Astro's i18n routing.
+// Proves `/` → en (default, unprefixed) and `/pt-br/` → pt-br resolve. The full
+// localized [...locale]/ page tree lands in e04; this only exercises the config.
+import '../styles/main.css';
+
+const locale = Astro.currentLocale ?? 'en';
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>big-news</title>
+  </head>
+  <body class="font-sans">
+    <main>
+      <h1 data-testid="locale">{locale}</h1>
+    </main>
+  </body>
+</html>
