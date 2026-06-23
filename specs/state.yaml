@@ -26,24 +26,24 @@ release:
   current_version: 0.1.0 # website/package.json
   last_tag: null
   last_publish: null
-  ci_verified: false # repo being recreated clean (no Claude attribution); re-verify after push
+  ci_verified: true # first CI run green on recreated repo
 git:
   branch: main
   repo: danielvm-git/big-news
   default_branch: main
-  hash: null # set after push to recreated repo
-  pushed: false # awaiting repo recreation (old repo had Claude co-author; redoing clean)
-  protection: "to re-apply after push: force-push + deletion blocked; linear history; direct commits (no PR gate)"
+  hash: "14cfe64"
+  pushed: true
+  contributors: "danielvm-git only (no Claude attribution)"
+  protection: "force-push + deletion blocked; linear history required; direct commits (no PR gate)"
 upstream:
   source: danielvm-git/astrobiologia
   relicense: "MIT relicensing authorized — maintainer owns upstream; upstream ships no LICENSE"
 handoff:
   last_step_completed: >
-    Rebuilt local git history as a SINGLE clean commit authored solely by
-    danielvm-git (no Co-Authored-By: Claude — that trailer had added "claude" to
-    the GitHub contributors list). Foundation intact: pure-npm Astro site in
-    website/ (v0.1.0), Husky pre-push gate mirrors CI (typecheck, format:check,
-    unit, build), commitlint + lint-staged hooks, pinned CI workflow. Awaiting old
-    repo deletion (token lacks delete_repo scope; force-push blocked by git guard)
-    before recreating clean and pushing.
+    Repo recreated clean after old one was deleted. Single foundation commit
+    authored solely by danielvm-git (NO Co-Authored-By: Claude — that trailer had
+    added "claude" to contributors). First CI run green; contributors = danielvm-git
+    only; branch protection re-applied. Pure-npm Astro site in website/ (v0.1.0),
+    Husky pre-push gate mirrors CI, commitlint + lint-staged hooks, pinned CI
+    workflow. Integration/E2E CI lanes dormant until e02/e04 add code to test.
   next_action: "continue e01 feature stories on website/: i18n routing, React island, Tailwind v4, structured logger + zod validation (ADR-0018/0015), BigBase footer"
