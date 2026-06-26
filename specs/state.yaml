@@ -1,5 +1,5 @@
 active_flow: build_epic # building e01 via build-epic cycle
-workflow_mode: interactive # human checkpoint per step (not yolo)
+workflow_mode: yolo # full auto-run through end of e01 (user requested)
 active_epic_id: e01
 active_story_id: e01s07 # BigBase-style footer (next) — e01s06 released to main
 completed_epic: false
@@ -12,11 +12,11 @@ project_cycle:
   next_skill: build-epic
 epic_cycle:
   # e01s06 released to main. Ready for e01s07 (BigBase footer).
-  current_step: 1 # ready for next story
-  next_skill: survey-context
-  story_bcps: 0
-  completed_steps: []
-  fast_mode: false
+  current_step: 2 # fast-mode: kickoff-branch (survey+plan done)
+  next_skill: kickoff-branch
+  story_bcps: 1
+  completed_steps: [1]
+  fast_mode: true # yolo: coalescing read-only steps
   audit_result: pass
   last_story_done: e01s06 # released to main as 598212c
 stack:
