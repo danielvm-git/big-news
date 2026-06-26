@@ -12,10 +12,10 @@ project_cycle:
   next_skill: build-epic
 epic_cycle:
   # e01s06 (observability & validation) audit passed.
-  current_step: 7 # commit-message (audit passed)
-  next_skill: commit-message
+  current_step: 8 # release-branch (commit done)
+  next_skill: release-branch
   story_bcps: 1 # from epic.yaml e01s06 bcps
-  completed_steps: [1, 2, 3, 4, 5, 6] # audit-code passed
+  completed_steps: [1, 2, 3, 4, 5, 6, 7] # commit-message done
   fast_mode: false
   audit_result: pass
   last_story_done: e01s05 # merged to main as 75bf3aa + 3c6506e
@@ -33,7 +33,7 @@ git:
   branch: feat/e01s06-observability-validation
   repo: danielvm-git/big-news
   default_branch: main
-  hash: "3c6506e"
+  hash: "499feb8"
   pushed: true
   contributors: "danielvm-git only (no Claude attribution)"
   protection: "force-push + deletion blocked; linear history required; direct commits (no PR gate)"
@@ -42,9 +42,8 @@ upstream:
   relicense: "MIT relicensing authorized — maintainer owns upstream; upstream ships no LICENSE"
 handoff:
   last_step_completed: >
-    e01s06 audit-code gate passed. All 9 checklist sections pass. F.I.R.S.T 3/3.
-    Files: logger.ts, middleware/index.ts, validation.ts, env.d.ts, tests (7/7 pass).
-    Typecheck: 0 errors. Unit tests: 7/7 pass.
-    Audit report: specs/verifications/AUDIT-e01-e01s06.md.
-  next_action: "run step 7 (commit-message) to draft Conventional Commits for e01s06"
-  next_skill: commit-message
+    e01s06 committed as 499feb8. 10 files, 383 insertions, 14 deletions.
+    feat(core): add structured logging middleware and zod input validation.
+    Ready for release-branch step 8 (solo-local integrate to main).
+  next_action: "run step 8 (release-branch) to land e01s06 to main"
+  next_skill: release-branch
