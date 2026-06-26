@@ -1,1 +1,65 @@
 @import 'tailwindcss';
+
+/* ── BigBase design tokens ── */
+:root {
+  --color-fg: #1a1a1a;
+  --color-bg: #ffffff;
+  --color-accent: #e00000;
+  --color-muted: #6b6b6b;
+  --color-border: #e5e5e5;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ── BigBase footer ── */
+.footer {
+  border-top: 1px solid var(--color-border);
+  margin-top: 4rem;
+  padding: 3rem 1.5rem 0;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.footer-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-column h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-fg);
+  margin: 0 0 0.75rem;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column li {
+  margin-bottom: 0.375rem;
+}
+
+.footer-column a {
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.footer-column a:hover {
+  color: var(--color-accent);
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--color-border);
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+}

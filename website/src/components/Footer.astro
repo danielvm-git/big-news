@@ -1,0 +1,39 @@
+---
+const year = new Date().getFullYear();
+const version = import.meta.env.PUBLIC_APP_VERSION ?? '0.0.0';
+---
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-column">
+      <h3>Product</h3>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/blog">Blog</a></li>
+        <li><a href="/changelog">Changelog</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h3>Resources</h3>
+      <ul>
+        <li><a href="/docs">Documentation</a></li>
+        <li><a href="/changelog">Changelog</a></li>
+        <li><a href="https://github.com/danielvm-git/big-news">GitHub</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h3>Community</h3>
+      <ul>
+        <li><a href="https://github.com/danielvm-git/big-news/issues">Report an Issue</a></li>
+        <li><a href="https://github.com/danielvm-git/big-news/discussions">Discussions</a></li>
+        <li><a href="https://github.com/danielvm-git">@danielvm-git</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    &copy; {year} big-news &middot; MIT License &middot; v{version}
+    &mdash; Built with <a href="https://github.com/danielvm-git/bigpowers">BigPowers</a> by <a
+      href="https://github.com/danielvm-git">danielvm-git</a
+    >
+  </div>
+</footer>
