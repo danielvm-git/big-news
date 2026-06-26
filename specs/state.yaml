@@ -11,13 +11,13 @@ project_cycle:
     - 3 # plan
   next_skill: build-epic
 epic_cycle:
-  # e01s06 (observability & validation) in progress.
-  current_step: 3 # kickoff-branch (survey+plan done)
-  next_skill: kickoff-branch
+  # e01s06 (observability & validation) audit passed.
+  current_step: 7 # commit-message (audit passed)
+  next_skill: commit-message
   story_bcps: 1 # from epic.yaml e01s06 bcps
-  completed_steps: [1, 2] # survey-context + plan-work (e01s06-tasks.yaml written)
+  completed_steps: [1, 2, 3, 4, 5, 6] # audit-code passed
   fast_mode: false
-  audit_result: null
+  audit_result: pass
   last_story_done: e01s05 # merged to main as 75bf3aa + 3c6506e
 stack:
   package_manager: npm # pure npm — package-lock.json
@@ -30,7 +30,7 @@ release:
   last_publish: null
   ci_verified: true # CI green for e01s05 integration test fix
 git:
-  branch: main
+  branch: feat/e01s06-observability-validation
   repo: danielvm-git/big-news
   default_branch: main
   hash: "3c6506e"
@@ -42,9 +42,9 @@ upstream:
   relicense: "MIT relicensing authorized — maintainer owns upstream; upstream ships no LICENSE"
 handoff:
   last_step_completed: >
-    e01s05 (test infrastructure) released to main. Setup vitest with unit + integration
-    projects (website/vitest.config.ts), disposable Postgres via docker-compose.test.yml,
-    StorageAdapter interface + MockAdapter. CI failed initially (missing @types/node for
-    process.env in integration test) and was fixed with a follow-up commit. All gates pass:
-    typecheck (0 errors), format, unit tests (23 pass), build, CI green.
-  next_action: "pick next e01 story — e01s06 (observability & zod validation) or e01s07 (BigBase footer)"
+    e01s06 audit-code gate passed. All 9 checklist sections pass. F.I.R.S.T 3/3.
+    Files: logger.ts, middleware/index.ts, validation.ts, env.d.ts, tests (7/7 pass).
+    Typecheck: 0 errors. Unit tests: 7/7 pass.
+    Audit report: specs/verifications/AUDIT-e01-e01s06.md.
+  next_action: "run step 7 (commit-message) to draft Conventional Commits for e01s06"
+  next_skill: commit-message
