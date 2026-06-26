@@ -1,8 +1,8 @@
 active_flow: build_epic # building e02 via build-epic cycle
 workflow_mode: yolo # full auto-run through end of e02 (user requested)
 active_epic_id: e02
-active_story_id: e02s01
-completed_epic: true # e01 all 7 stories done, archived
+active_story_id: e02s02
+completed_epic: false
 project_cycle:
   current_phase: build # discover → elaborate → plan → build → deploy → support
   completed_phases:
@@ -11,15 +11,15 @@ project_cycle:
     - 3 # plan
   next_skill: build-epic
 epic_cycle:
-  # e02s01 in flight: building Storage Adapter Interface via build-epic cycle
-  current_step: 5 # step 5: verify-work (running UAT + mechanical gates)
+  # e02s01 complete! Next: e02s02 — PostgreSQL connection (postgres.js)
+  current_step: 0 # reset for e02s02
   next_skill: kickoff-branch
   story_bcps: 1 # e02s01 (1 BCP)
-  completed_steps: [1, 2, 3]
+  completed_steps: []
   fast_mode: false
-  audit_result: null
-  last_story_done: e01s07 # released to main as 114734e
-  next_story: e02s01 # Storage adapter interface (the test seam)
+  audit_result: pass
+  last_story_done: e02s01 # released to main as 55ec74a
+  next_story: e02s02 # PostgreSQL connection (postgres.js)
 stack:
   package_manager: npm # pure npm — package-lock.json
   site_dir: website # Astro site lives here
@@ -34,7 +34,7 @@ git:
   branch: main
   repo: danielvm-git/big-news
   default_branch: main
-  hash: "114734e"
+  hash: "55ec74a"
   pushed: true
   contributors: "danielvm-git only (no Claude attribution)"
   protection: "force-push + deletion blocked; linear history required; direct commits (no PR gate)"
@@ -49,15 +49,12 @@ handoff:
     [s04 article ‖ s05 settings ‖ s06 storage ‖ s07 sanitizer]. Slopcheck all [OK]
     (postgres already installed; node-pg-migrate, @aws-sdk/client-s3, sanitize-html to add).
   last_step_completed: >
-    e01 complete! All 7 stories shipped:
-    s01: Astro 5 scaffold + i18n
-    s02: Dev toolchain (Husky, commitlint, Prettier)
-    s03: Conventions & specs
-    s04: License, repo, CI
-    s05: Test infrastructure
-    s06: Observability & validation (logger, middleware, zod)
-    s07: BigBase-style footer
-    Epic capsule archived to specs/epics/archive/e01-foundation-scaffold.
-  next_action: "build-epic step 3: kickoff-branch for e02s01"
-  next_skill: kickoff-branch
-  notes: "e02 capsule planned (slice-tasks + plan-work folded into this run). Remaining story specs (s02–s07) written just-in-time during build; tasks.yaml already runnable for all 7."
+    e02s01 complete! StorageAdapter interface shipped:
+    Implemented domain types (ArticleData, TranslationData, UserData,
+    SettingsData, SessionData), sub-adapter interfaces (ArticleAdapter,
+    AuthAdapter, FileStorageAdapter, SettingsAdapter), composed
+    StorageAdapter, full in-memory MockAdapter, and 31 contract tests.
+    Released to main as 55ec74a via build-epic cycle.
+  next_action: "build-epic step 1: survey-context for e02s02"
+  next_skill: survey-context
+  notes: "e02s01 complete! s02–s07 tasks.yaml already runnable. s02: PostgreSQL connection."

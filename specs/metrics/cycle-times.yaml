@@ -1,0 +1,7 @@
+# Cycle-time recording (release-branch step 8a)
+- id: e02s01
+  bcps: 1
+  start: "2026-06-26T18:37:00Z"
+  end: "2026-06-26T19:08:00Z"
+  cycle_minutes: 31
+  bcp_per_hour: 1.94

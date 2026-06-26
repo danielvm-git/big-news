@@ -2,7 +2,7 @@
 # populate each capsule and develop-tdd ships stories. Stories appear here once sliced.
 development_status:
   e01: done # all 7 stories complete, capsule archived
-  e02: planned # capsule sliced + planned (7 stories, 8 BCPs); not yet built
+  e02: building # s01 done (StorageAdapter interface), s02–s07 to go
   e03: not-started
   e04: not-started
   e05: not-started
