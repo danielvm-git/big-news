@@ -19,10 +19,10 @@ workflows:
     status: done # specs/release-plan.yaml
     path: plan-release/SKILL.md
   slice-tasks:
-    status: todo # NEXT — expand each epic into epics/eNN-*/ capsules
+    status: in-progress # e02 sliced (folded into plan-work run); e03–e09 still todo
     path: slice-tasks/SKILL.md
   plan-work:
-    status: todo # after slice-tasks, per epic
+    status: in-progress # e02 planned (capsule + 7 tasks.yaml + e02s01 spec); other epics per build wave
     path: plan-work/SKILL.md
   assess-impact:
     status: optional

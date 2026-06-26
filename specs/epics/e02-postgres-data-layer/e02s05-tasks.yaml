@@ -1,0 +1,29 @@
+# Runnable task plan for story e02s05 — Settings adapter
+# Decoupled from epic.yaml so verify commands stay runnable as-is.
+# npm is the _bsm_wrap shell function here; call the absolute binary. All scripts run from website/.
+# Integration steps need the disposable DB: (cd website && docker compose -f docker-compose.test.yml up -d).
+story_id: e02s05
+title: "Settings adapter"
+bcps: 1
+npm: &npm /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm
+gate: "(cd website && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- settings-adapter)"
+
+# Implements SettingsAdapter (e02s01) over the settings table (e02s03). Single-row upsert.
+steps:
+  - id: 1
+    do: >
+      Create website/src/lib/adapter/postgres/settings-adapter.ts implementing SettingsAdapter:
+      getSettings (read the single settings row, returning defaults if none) and updateSettings
+      (single-row upsert of siteName, tagline, description).
+    verify: "grep -q 'getSettings' website/src/lib/adapter/postgres/settings-adapter.ts && grep -q 'updateSettings' website/src/lib/adapter/postgres/settings-adapter.ts"
+
+  - id: 2
+    do: >
+      Add website/src/lib/adapter/postgres/__tests__/settings-adapter.integration.test.ts:
+      updateSettings then getSettings round-trips the same values (and a second update overwrites,
+      not duplicates, the row).
+    verify: "(cd website && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- settings-adapter)"
+
+  - id: 3
+    do: "Final gate: typecheck clean; settings-adapter integration suite green."
+    verify: "(cd website && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run typecheck && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- settings-adapter)"

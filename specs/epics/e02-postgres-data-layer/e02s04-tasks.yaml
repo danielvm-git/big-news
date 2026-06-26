@@ -1,0 +1,49 @@
+# Runnable task plan for story e02s04 — PostgreSQL article adapter
+# Decoupled from epic.yaml so verify commands stay runnable as-is.
+# npm is the _bsm_wrap shell function here; call the absolute binary. All scripts run from website/.
+# Integration steps need the disposable DB: (cd website && docker compose -f docker-compose.test.yml up -d).
+story_id: e02s04
+title: "PostgreSQL article adapter"
+bcps: 1
+npm: &npm /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm
+gate: "(cd website && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- article-adapter)"
+
+# Implements ArticleAdapter (e02s01) over the schema from e02s03 using the connection from e02s02.
+# Parameterized queries only (ADR-0011). Ports locale-aware translation pick from upstream article-read.ts.
+steps:
+  - id: 1
+    do: >
+      Create website/src/lib/adapter/postgres/article-adapter.ts implementing ArticleAdapter:
+      createArticle/updateArticle with translation upsert, deleteArticle (relies on FK CASCADE),
+      getArticle/getArticleBySlug/listArticles.
+    verify: "grep -q 'ArticleAdapter' website/src/lib/adapter/postgres/article-adapter.ts && grep -q 'createArticle' website/src/lib/adapter/postgres/article-adapter.ts"
+
+  - id: 2
+    do: >
+      Add the read/query methods: getPublishedArticles (status=published, ORDER BY published_at DESC,
+      limit/offset + total count), getFeaturedArticles, getArticlesByCategory.
+    verify: "grep -q 'getPublishedArticles' website/src/lib/adapter/postgres/article-adapter.ts && grep -q 'getArticlesByCategory' website/src/lib/adapter/postgres/article-adapter.ts"
+
+  - id: 3
+    do: >
+      Implement searchArticles using to_tsquery against the GIN index, ranked by ts_rank
+      (parameterized — websearch_to_tsquery/plainto_tsquery, never string interpolation).
+    verify: "grep -q 'searchArticles' website/src/lib/adapter/postgres/article-adapter.ts && grep -qi 'tsquery\\|ts_rank' website/src/lib/adapter/postgres/article-adapter.ts"
+
+  - id: 4
+    do: >
+      Port the locale-aware translation-pick logic from upstream article-read.ts as pickTranslation
+      (requested locale → default 'en' → first available), adapted English-canonical.
+    verify: "grep -q 'pickTranslation' website/src/lib/adapter/postgres/article-adapter.ts"
+
+  - id: 5
+    do: >
+      Add website/src/lib/adapter/postgres/__tests__/article-adapter.integration.test.ts covering every
+      acceptance scenario: create returns id+timestamps; publish→visible; list 10 of 25 by published_at
+      DESC; get-by-slug locale pick; pagination page1 limit10 of 30 → 10 + total 30; delete cascades to
+      translations; searchArticles ranks matches.
+    verify: "(cd website && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- article-adapter)"
+
+  - id: 6
+    do: "Final gate: typecheck clean; article-adapter integration suite green."
+    verify: "(cd website && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run typecheck && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- article-adapter)"

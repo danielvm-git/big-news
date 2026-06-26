@@ -1,0 +1,171 @@
+# Epic e02: PostgreSQL Data Layer
+# Adapter seam + postgres.js + node-pg-migrate + article/settings/S3 adapters + search + sanitizer.
+# Site lives in website/ (pure npm). Replaces the Appwrite backend from upstream astrobiologia.
+# Sliced from specs/archive/RELEASE-PLAN-detailed.md (Stories 2.1–2.7).
+epic_id: e02
+title: "PostgreSQL Data Layer (adapter seam, postgres.js, migrations, article/settings/S3, search, sanitizer)"
+wsjf: 6.0
+bcps: 8
+status: planned
+blocks: [e03, e04, e05]
+adrs:
+  [
+    ADR-0001,
+    ADR-0002,
+    ADR-0004,
+    ADR-0005,
+    ADR-0006,
+    ADR-0011,
+    ADR-0015,
+    ADR-0016,
+  ]
+note: >
+  Foundational data layer behind the storage-adapter seam (ADR-0004). postgres.js single TCP
+  driver (ADR-0001); node-pg-migrate advisory-lock migrations (ADR-0002); S3-default object
+  storage with local-FS dev fallback (ADR-0006); sanitize-html on write (ADR-0005). Blocks
+  auth (e03), public pages (e04), and admin panel (e05). Builds on the e01 scaffold: the
+  StorageAdapter stub (src/lib/adapter/index.ts), in-memory MockAdapter
+  (src/lib/adapter/__tests__/mock-adapter.ts), vitest unit/integration projects, and the
+  disposable Postgres at website/docker-compose.test.yml (postgres:16, port 5433).
+
+# Verify commands and DB setup live in the decoupled eNNsYY-tasks.yaml files so they stay
+# runnable as-is. npm is the _bsm_wrap shell function here — tasks call the absolute nvm binary.
+# Integration steps need the test DB: (cd website && docker compose -f docker-compose.test.yml up -d).
+
+stories:
+  - id: e02s01
+    title: "Storage adapter interface (the test seam)"
+    status: planned
+    bcps: 1
+    spec: e02s01-adapter-seam.md
+    tasks_file: e02s01-tasks.yaml
+    acceptance: |
+      Feature: Storage Adapter Interface
+        Scenario: Article methods exist
+          Then it defines createArticle, getArticle, updateArticle, deleteArticle, listArticles,
+            getArticleBySlug, getPublishedArticles, getFeaturedArticles, getArticlesByCategory, searchArticles
+        Scenario: Translation methods exist
+          Then it defines createTranslation, getTranslations, updateTranslation, deleteTranslation
+        Scenario: Auth methods exist
+          Then it defines createUser, authenticateUser, createSession, validateSession, destroySession, getUser
+        Scenario: Storage methods exist
+          Then it defines uploadFile, getFileUrl, deleteFile
+        Scenario: Settings methods exist
+          Then it defines getSettings, updateSettings
+    gate: "mock adapter type-checks against StorageAdapter; the interface contract unit test passes"
+
+  - id: e02s02
+    title: "PostgreSQL connection (postgres.js)"
+    status: planned
+    bcps: 1
+    tasks_file: e02s02-tasks.yaml
+    acceptance: |
+      Feature: PostgreSQL Connection
+        Scenario: Connection succeeds with valid env
+          Given DATABASE_URL is set
+          When I initialize the client
+          Then a connection is established and `SELECT 1` returns 1
+        Scenario: Missing env fails fast
+          Given DATABASE_URL is not set
+          When I initialize the client
+          Then a clear error names the missing variable
+    gate: "integration test connects, runs SELECT 1, and asserts the fail-fast error when DATABASE_URL is unset"
+
+  - id: e02s03
+    title: "Schema + versioned migrations (node-pg-migrate)"
+    status: planned
+    bcps: 2
+    tasks_file: e02s03-tasks.yaml
+    acceptance: |
+      Feature: Migrations
+        Scenario: Migrations create all tables
+          When migrations run
+          Then tables exist: articles, article_translations, users, settings, sessions, pgmigrations
+        Scenario: Articles columns
+          Then articles has id, category, tags, featured_image, featured_image_alt, status,
+            featured, author_id, author_name, published_at, created_at, updated_at
+        Scenario: Translation columns + cascade
+          Then article_translations has id, article_id (FK ON DELETE CASCADE), language, title, slug,
+            excerpt, content, meta_title, meta_description
+        Scenario: Full-text search index
+          Then article_translations has a GIN index over to_tsvector(title||excerpt||content)
+        Scenario: Concurrent startup is safe
+          Given two instances boot simultaneously
+          When both attempt to migrate
+          Then an advisory lock serializes them and the schema is applied exactly once
+    gate: "integration test applies migrations, asserts all tables/columns/index, rolls back cleanly, and a concurrent double-run produces one schema"
+
+  - id: e02s04
+    title: "PostgreSQL article adapter"
+    status: planned
+    bcps: 1
+    tasks_file: e02s04-tasks.yaml
+    acceptance: |
+      Feature: Article Adapter
+        Scenario: Create returns id + timestamps
+        Scenario: Publish makes article visible in published queries
+        Scenario: List published returns 10 of 25 ordered by publishedAt DESC
+        Scenario: Get by slug returns the right article (locale-aware translation pick)
+        Scenario: Pagination — page 1 limit 10 of 30 returns 10 + total 30
+        Scenario: Delete cascades to translations
+        Scenario: searchArticles uses full-text search and ranks matches
+    gate: "integration test covers every scenario above against a real DB"
+
+  - id: e02s05
+    title: "Settings adapter"
+    status: planned
+    bcps: 1
+    tasks_file: e02s05-tasks.yaml
+    acceptance: |
+      Feature: Settings
+        Scenario: Settings round-trip
+          Given site settings (siteName, tagline, description)
+          When I save then retrieve them
+          Then the same values come back (single-row upsert)
+    gate: "integration test — save then retrieve round-trips"
+
+  - id: e02s06
+    title: "S3-compatible storage adapter (ADR-0006)"
+    status: planned
+    bcps: 1
+    tasks_file: e02s06-tasks.yaml
+    acceptance: |
+      Feature: File Storage
+        Scenario: Upload to S3-compatible backend
+          Given S3_* env is configured
+          When I upload a valid image
+          Then it is stored and getFileUrl returns a public URL
+        Scenario: Local FS fallback (dev)
+          Given STORAGE_DRIVER=local
+          When I upload an image
+          Then it is written under ./uploads and served via /uploads
+        Scenario: Delete removes the object
+        Scenario: Non-image / oversized upload is rejected
+    gate: "local-driver test (temp dir) covers upload/url/delete + MIME/size rejection; S3 path optionally verified against MinIO in compose"
+
+  - id: e02s07
+    title: "Sanitization utility (ADR-0005)"
+    status: planned
+    bcps: 1
+    tasks_file: e02s07-tasks.yaml
+    acceptance: |
+      Feature: HTML Sanitization
+        Scenario: Scripts are stripped
+          Given content '<p>hi</p><script>alert(1)</script>'
+          When I sanitize it
+          Then the output contains '<p>hi</p>' and no '<script>'
+        Scenario: Allowed formatting survives
+          Then strong, em, a[href], img[src], h2-h4, ul/ol/li, blockquote are preserved
+        Scenario: javascript: URLs are removed
+          Given an anchor with href 'javascript:alert(1)'
+          Then the href is dropped
+    gate: "unit test covers all three scenarios (strip script, keep allowlist, drop javascript: href)"
+
+# Build order within the epic (dependency-constrained):
+#   e02s01 (interface) → e02s02 (connection) → e02s03 (schema/migrations)
+#   → e02s04 (article) ‖ e02s05 (settings) ‖ e02s06 (storage) ‖ e02s07 (sanitizer)
+build_order:
+  - e02s01
+  - e02s02
+  - e02s03
+  - [e02s04, e02s05, e02s06, e02s07]

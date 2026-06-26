@@ -1,0 +1,53 @@
+# Runnable task plan for story e02s03 — Schema + versioned migrations (node-pg-migrate)
+# Decoupled from epic.yaml so verify commands stay runnable as-is.
+# npm is the _bsm_wrap shell function here; call the absolute binary. All scripts run from website/.
+# Integration steps need the disposable DB: (cd website && docker compose -f docker-compose.test.yml up -d).
+story_id: e02s03
+title: "Schema + versioned migrations (node-pg-migrate)"
+bcps: 2
+npm: &npm /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm
+gate: "(cd website && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- migrate)"
+
+# node-pg-migrate [OK] — mature, maintained, standard for Postgres migrations. ADR-0002.
+steps:
+  - id: 1
+    do: "Install node-pg-migrate (cd website && npm i node-pg-migrate)."
+    verify: "grep -q 'node-pg-migrate' website/package.json"
+
+  - id: 2
+    do: >
+      Add scripts to website/package.json: "migrate" (node-pg-migrate up) and "migrate:down"
+      (node-pg-migrate down), both reading DATABASE_URL.
+    verify: 'grep -q ''"migrate"'' website/package.json && grep -q ''"migrate:down"'' website/package.json'
+
+  - id: 3
+    do: >
+      Create website/migrations/ with the initial schema migration: tables articles
+      (id, category, tags, featured_image, featured_image_alt, status, featured, author_id,
+      author_name, published_at, created_at, updated_at), article_translations
+      (id, article_id FK ON DELETE CASCADE, language, title, slug, excerpt, content, meta_title,
+      meta_description), users, settings, sessions.
+    verify: "test -d website/migrations && ls website/migrations | grep -q . && grep -rqi 'ON DELETE CASCADE' website/migrations/"
+
+  - id: 4
+    do: >
+      Add a GIN full-text index on article_translations over
+      to_tsvector('simple', title || ' ' || coalesce(excerpt,'') || ' ' || content).
+    verify: "grep -rqi 'to_tsvector' website/migrations/ && grep -rqi 'gin' website/migrations/"
+
+  - id: 5
+    do: >
+      Create website/src/lib/adapter/postgres/migrate.ts that runs node-pg-migrate `up`
+      under a pg_advisory_lock so concurrent instance startups serialize and apply the schema once.
+    verify: "grep -q 'advisory' website/src/lib/adapter/postgres/migrate.ts"
+
+  - id: 6
+    do: >
+      Add website/src/lib/adapter/postgres/__tests__/migrate.integration.test.ts: migrate up asserts
+      all tables/columns/index present, migrate down rolls back cleanly, and a concurrent double-run
+      yields exactly one schema (no duplicate-apply error).
+    verify: "(cd website && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- migrate)"
+
+  - id: 7
+    do: "Final gate: typecheck clean; migration integration suite green."
+    verify: "(cd website && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run typecheck && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- migrate)"

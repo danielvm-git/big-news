@@ -1,0 +1,32 @@
+# Runnable task plan for story e02s07 — Sanitization utility (ADR-0005)
+# Decoupled from epic.yaml so verify commands stay runnable as-is.
+# npm is the _bsm_wrap shell function here; call the absolute binary. All scripts run from website/.
+story_id: e02s07
+title: "Sanitization utility (ADR-0005)"
+bcps: 1
+npm: &npm /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm
+gate: "(cd website && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:unit -- sanitize)"
+
+# Single sanitizer applied to all rich-text HTML before storage (sanitize-on-write, ADR-0005).
+# sanitize-html [OK] — mature, widely used; @types/sanitize-html [OK] dev types. Pure unit-testable.
+steps:
+  - id: 1
+    do: "Install sanitize-html + @types/sanitize-html (cd website && npm i sanitize-html && npm i -D @types/sanitize-html)."
+    verify: "grep -q 'sanitize-html' website/package.json"
+
+  - id: 2
+    do: >
+      Create website/src/lib/sanitize.ts exporting sanitizeContent(html): allowlist strong, em, a[href],
+      img[src], h2-h4, ul, ol, li, blockquote, p; strip <script>; drop javascript: URLs on href/src.
+    verify: "test -f website/src/lib/sanitize.ts && grep -q 'blockquote' website/src/lib/sanitize.ts"
+
+  - id: 3
+    do: >
+      Add website/src/lib/__tests__/sanitize.test.ts: '<p>hi</p><script>alert(1)</script>' → contains
+      '<p>hi</p>' and no '<script>'; allowed formatting tags survive; an anchor with href
+      'javascript:alert(1)' has its href dropped.
+    verify: "(cd website && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:unit -- sanitize)"
+
+  - id: 4
+    do: "Final gate: typecheck clean; sanitize unit suite green."
+    verify: "(cd website && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run typecheck && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:unit -- sanitize)"

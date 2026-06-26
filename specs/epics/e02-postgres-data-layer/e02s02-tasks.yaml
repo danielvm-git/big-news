@@ -1,0 +1,35 @@
+# Runnable task plan for story e02s02 — PostgreSQL connection (postgres.js)
+# Decoupled from epic.yaml so verify commands stay runnable as-is.
+# npm is the _bsm_wrap shell function here; call the absolute binary. All scripts run from website/.
+# Integration steps need the disposable DB: (cd website && docker compose -f docker-compose.test.yml up -d)
+# — postgres:16, port 5433; DATABASE_URL defaults to postgres://bignews:bignews@localhost:5433/bignews_test.
+story_id: e02s02
+title: "PostgreSQL connection (postgres.js)"
+bcps: 1
+npm: &npm /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm
+gate: "(cd website && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- connection)"
+
+# postgres.js (`postgres`) is ALREADY a dependency (added in e01). ADR-0001. No new install.
+steps:
+  - id: 1
+    do: >
+      Create website/src/lib/adapter/postgres/connection.ts: a lazy singleton postgres() client
+      reading DATABASE_URL, SSL-aware for hosted providers (enable ssl when the URL/PGSSLMODE asks).
+    verify: "test -f website/src/lib/adapter/postgres/connection.ts && grep -q 'postgres' website/src/lib/adapter/postgres/connection.ts"
+
+  - id: 2
+    do: >
+      Fail fast: the client getter throws a clear error naming DATABASE_URL when it is unset
+      (no silent default in the production path).
+    verify: "grep -q 'DATABASE_URL' website/src/lib/adapter/postgres/connection.ts"
+
+  - id: 3
+    do: >
+      Add website/src/lib/adapter/__tests__/connection.integration.test.ts importing the module:
+      asserts SELECT 1 returns 1 against the test DB, and that constructing with no DATABASE_URL
+      throws naming the variable. (Supersedes the e01 inline db-connection smoke test.)
+    verify: "(cd website && docker compose -f docker-compose.test.yml up -d && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:integration -- connection)"
+
+  - id: 4
+    do: "Final gate: integration connection suite green; unit suite still green (no DB needed)."
+    verify: "(cd website && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run typecheck && /Users/danielvm/.nvm/versions/node/v24.15.0/bin/npm run test:unit)"
