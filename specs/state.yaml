@@ -1,7 +1,7 @@
 active_flow: build_epic # building e01 via build-epic cycle
 workflow_mode: interactive # human checkpoint per step (not yolo)
 active_epic_id: e01
-active_story_id: e01s06 # observability & input-validation primitives (ADR-018, ADR-015)
+active_story_id: e01s07 # BigBase-style footer (next) — e01s06 released to main
 completed_epic: false
 project_cycle:
   current_phase: build # discover → elaborate → plan → build → deploy → support
@@ -11,14 +11,14 @@ project_cycle:
     - 3 # plan
   next_skill: build-epic
 epic_cycle:
-  # e01s06 (observability & validation) audit passed.
-  current_step: 8 # release-branch (commit done)
-  next_skill: release-branch
-  story_bcps: 1 # from epic.yaml e01s06 bcps
-  completed_steps: [1, 2, 3, 4, 5, 6, 7] # commit-message done
+  # e01s06 released to main. Ready for e01s07 (BigBase footer).
+  current_step: 1 # ready for next story
+  next_skill: survey-context
+  story_bcps: 0
+  completed_steps: []
   fast_mode: false
   audit_result: pass
-  last_story_done: e01s05 # merged to main as 75bf3aa + 3c6506e
+  last_story_done: e01s06 # released to main as 598212c
 stack:
   package_manager: npm # pure npm — package-lock.json
   site_dir: website # Astro site lives here
@@ -30,10 +30,10 @@ release:
   last_publish: null
   ci_verified: true # CI green for e01s05 integration test fix
 git:
-  branch: feat/e01s06-observability-validation
+  branch: main
   repo: danielvm-git/big-news
   default_branch: main
-  hash: "499feb8"
+  hash: "598212c"
   pushed: true
   contributors: "danielvm-git only (no Claude attribution)"
   protection: "force-push + deletion blocked; linear history required; direct commits (no PR gate)"
@@ -42,8 +42,9 @@ upstream:
   relicense: "MIT relicensing authorized — maintainer owns upstream; upstream ships no LICENSE"
 handoff:
   last_step_completed: >
-    e01s06 committed as 499feb8. 10 files, 383 insertions, 14 deletions.
+    e01s06 released to main as 598212c.
     feat(core): add structured logging middleware and zod input validation.
-    Ready for release-branch step 8 (solo-local integrate to main).
-  next_action: "run step 8 (release-branch) to land e01s06 to main"
-  next_skill: release-branch
+    10 files, 383 insertions. Preflight gate: typecheck(0), format:check(pass),
+    unit(30/30), build(pass). e01 is 6/7 stories done.
+  next_action: "start e01s07 (BigBase-style footer) — next story in e01"
+  next_skill: build-epic
