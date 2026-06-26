@@ -12,10 +12,10 @@ project_cycle:
   next_skill: build-epic
 epic_cycle:
   # e02s01 in flight: building Storage Adapter Interface via build-epic cycle
-  current_step: 2 # step 2: plan-work (done — tasks already written, skip assess-impact for net-new)
+  current_step: 5 # step 5: verify-work (running UAT + mechanical gates)
   next_skill: kickoff-branch
   story_bcps: 1 # e02s01 (1 BCP)
-  completed_steps: [1, 2]
+  completed_steps: [1, 2, 3]
   fast_mode: false
   audit_result: null
   last_story_done: e01s07 # released to main as 114734e
