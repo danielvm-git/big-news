@@ -3,7 +3,7 @@
 // Requires a running test database on DATABASE_URL (default: docker compose)
 // ---------------------------------------------------------------------------
 
-import { describe, it, expect, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { getDb, closeDb, resetDb } from '../postgres/connection';
 
 // Store original env so we can restore it
@@ -46,7 +46,11 @@ describe('PostgreSQL connection', () => {
 });
 
 describe('fail-fast when DATABASE_URL is missing', () => {
-  const OLD_ENV = process.env;
+  let originalUrl: string | undefined;
+
+  beforeAll(() => {
+    originalUrl = process.env.DATABASE_URL;
+  });
 
   beforeEach(() => {
     // Clear DATABASE_URL for this test group
@@ -55,7 +59,11 @@ describe('fail-fast when DATABASE_URL is missing', () => {
   });
 
   afterAll(() => {
-    process.env = OLD_ENV;
+    if (originalUrl !== undefined) {
+      process.env.DATABASE_URL = originalUrl;
+    } else {
+      delete process.env.DATABASE_URL;
+    }
   });
 
   it('throws a descriptive error naming DATABASE_URL when env is unset', () => {

@@ -124,6 +124,85 @@ const DEMO_ARTICLES = [
   },
 ];
 
+async function seedAdmin(
+  sql: postgres.Sql | postgres.TransactionSql
+): Promise<{ id: string; email: string; password_msg: string }> {
+  const adminEmail = process.env.SEED_ADMIN_EMAIL ?? 'admin@bignews.com';
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? 'admin123';
+  const [existingAdmin] = await sql`SELECT id FROM users WHERE email = ${adminEmail}`;
+
+  if (existingAdmin) {
+    console.log('Admin already exists, skipping...');
+    return { id: existingAdmin.id, email: adminEmail, password_msg: '(already exists)' };
+  }
+
+  const passwordHash = await hash(adminPassword);
+  const [admin] = await sql`
+    INSERT INTO users (email, name, role, password_hash)
+    VALUES (${adminEmail}, 'Admin', 'admin', ${passwordHash})
+    RETURNING id
+  `;
+  console.log(`Admin created: ${adminEmail} / ${adminPassword}`);
+  return { id: admin.id, email: adminEmail, password_msg: adminPassword };
+}
+
+async function seedArticles(
+  sql: postgres.Sql | postgres.TransactionSql,
+  adminId: string
+): Promise<void> {
+  for (const demo of DEMO_ARTICLES) {
+    const enTranslation = demo.translations.en;
+    const [existing] = await sql`
+      SELECT a.id FROM articles a
+      JOIN article_translations t ON t.article_id = a.id
+      WHERE t.slug = ${enTranslation.slug} AND t.language = 'en'
+    `;
+
+    if (existing) {
+      console.log(`Article "${enTranslation.title}" already exists, skipping...`);
+      continue;
+    }
+
+    const [article] = await sql`
+      INSERT INTO articles (category, tags, featured_image, featured_image_alt,
+        status, featured, author_id, author_name, published_at, created_at, updated_at)
+      VALUES (
+        ${demo.category}, ${sql.array(demo.tags)}, '/images/placeholder.jpg', '',
+        ${demo.status}, ${demo.featured}, ${adminId}, 'Admin',
+        ${demo.status === 'published' ? new Date() : null}, now(), now()
+      )
+      RETURNING id
+    `;
+
+    for (const [lang, t] of Object.entries(demo.translations)) {
+      await sql`
+        INSERT INTO article_translations
+          (article_id, language, title, slug, excerpt, content, meta_title, meta_description)
+        VALUES (
+          ${article.id}, ${lang}, ${t.title}, ${t.slug},
+          ${t.excerpt}, ${t.content}, ${t.title}, ${t.excerpt}
+        )
+      `;
+    }
+
+    console.log(`  ✓ "${enTranslation.title}" (${demo.category})`);
+  }
+}
+
+async function seedSettings(sql: postgres.Sql | postgres.TransactionSql): Promise<void> {
+  const [existingSetting] = await sql`SELECT id FROM settings LIMIT 1`;
+  if (!existingSetting) {
+    await sql`
+      INSERT INTO settings (site_name, tagline, description, locale)
+      VALUES ('big-news', 'An open-source PostgreSQL news CMS',
+              'Built with Astro 5+, PostgreSQL, and BigPowers', 'en')
+    `;
+    console.log('Settings seeded');
+  } else {
+    console.log('Settings already exist, skipping...');
+  }
+}
+
 async function main() {
   const url = process.env.DATABASE_URL;
   if (!url) {
@@ -137,81 +216,15 @@ async function main() {
   const sql = postgres(url, { max: 2 });
 
   try {
-    // ── Seed admin ──────────────────────────────────────────
-    const adminEmail = 'admin@bignews.com';
-    const adminPassword = 'admin123';
-    const [existingAdmin] = await sql`SELECT id FROM users WHERE email = ${adminEmail}`;
+    await sql.begin(async (tx) => {
+      const admin = await seedAdmin(tx);
+      await seedArticles(tx, admin.id);
+      await seedSettings(tx);
 
-    let adminId: string;
-    if (existingAdmin) {
-      adminId = existingAdmin.id;
-      console.log('Admin already exists, skipping...');
-    } else {
-      const passwordHash = await hash(adminPassword);
-      const [admin] = await sql`
-        INSERT INTO users (email, name, role, password_hash)
-        VALUES (${adminEmail}, 'Admin', 'admin', ${passwordHash})
-        RETURNING id
-      `;
-      adminId = admin.id;
-      console.log(`Admin created: ${adminEmail} / ${adminPassword}`);
-    }
-
-    // ── Seed demo articles ──────────────────────────────────
-    for (const demo of DEMO_ARTICLES) {
-      const enTranslation = demo.translations.en;
-      const [existing] = await sql`
-        SELECT a.id FROM articles a
-        JOIN article_translations t ON t.article_id = a.id
-        WHERE t.slug = ${enTranslation.slug} AND t.language = 'en'
-      `;
-
-      if (existing) {
-        console.log(`Article "${enTranslation.title}" already exists, skipping...`);
-        continue;
-      }
-
-      const [article] = await sql`
-        INSERT INTO articles (category, tags, featured_image, featured_image_alt,
-          status, featured, author_id, author_name, published_at, created_at, updated_at)
-        VALUES (
-          ${demo.category}, ${sql.array(demo.tags)}, '/images/placeholder.jpg', '',
-          ${demo.status}, ${demo.featured}, ${adminId}, 'Admin',
-          ${demo.status === 'published' ? new Date() : null}, now(), now()
-        )
-        RETURNING id
-      `;
-
-      for (const [lang, t] of Object.entries(demo.translations)) {
-        await sql`
-          INSERT INTO article_translations
-            (article_id, language, title, slug, excerpt, content, meta_title, meta_description)
-          VALUES (
-            ${article.id}, ${lang}, ${t.title}, ${t.slug},
-            ${t.excerpt}, ${t.content}, ${t.title}, ${t.excerpt}
-          )
-        `;
-      }
-
-      console.log(`  ✓ "${enTranslation.title}" (${demo.category})`);
-    }
-
-    // ── Seed settings ───────────────────────────────────────
-    const [existingSetting] = await sql`SELECT id FROM settings LIMIT 1`;
-    if (!existingSetting) {
-      await sql`
-        INSERT INTO settings (site_name, tagline, description, locale)
-        VALUES ('big-news', 'An open-source PostgreSQL news CMS',
-                'Built with Astro 5+, PostgreSQL, and BigPowers', 'en')
-      `;
-      console.log('Settings seeded');
-    } else {
-      console.log('Settings already exist, skipping...');
-    }
-
-    console.log('\n✅ Seed complete!');
-    console.log(`   Admin: ${adminEmail} / ${adminPassword}`);
-    console.log(`   Articles: ${DEMO_ARTICLES.length} demo articles`);
+      console.log('\n✅ Seed complete!');
+      console.log(`   Admin: ${admin.email} / ${admin.password_msg}`);
+      console.log(`   Articles: ${DEMO_ARTICLES.length} demo articles`);
+    });
   } finally {
     await sql.end();
   }

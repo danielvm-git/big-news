@@ -37,8 +37,8 @@ beforeAll(async () => {
 afterAll(async () => {
   // Clean up any articles created during tests
   if (sql) {
-    for (const id of createdIds) {
-      await sql`DELETE FROM articles WHERE id = ${id}`.catch(() => {});
+    if (createdIds.length > 0) {
+      await sql`DELETE FROM articles WHERE id = ANY(${createdIds})`.catch(() => {});
     }
     await sql.end();
   }
