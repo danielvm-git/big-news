@@ -33,6 +33,7 @@ export async function runMigrations(): Promise<void> {
     direction: 'up',
     migrationsTable: 'pgmigrations',
     count: Infinity,
+    noLock: true,
     log: () => {
       /* silent — use structured logger in production */
     },
@@ -56,6 +57,7 @@ export async function dropMigrations(): Promise<void> {
     direction: 'down',
     migrationsTable: 'pgmigrations',
     count: Infinity,
+    noLock: true,
     log: () => {
       /* silent */
     },
