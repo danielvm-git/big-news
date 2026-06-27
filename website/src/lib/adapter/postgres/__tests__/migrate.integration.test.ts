@@ -18,23 +18,20 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  if (sql) {
-    // Ensure clean state: drop everything
-    await sql`DROP SCHEMA public CASCADE`;
-    await sql`CREATE SCHEMA public`;
-    await sql`GRANT ALL ON SCHEMA public TO public`;
-    await sql.end();
-  }
+  await sql?.end();
 });
 
 /**
- * Drop all tables in the public schema via raw SQL (fast, works on pooled connections).
- * Used instead of node-pg-migrate's down direction which is slow on Neon serverless.
+ * Drop all app tables (not the full public schema — avoids breaking
+ * node-pg-migrate's internal type cache).
  */
 async function dropAll(sql: postgres.Sql): Promise<void> {
-  await sql`DROP SCHEMA public CASCADE`;
-  await sql`CREATE SCHEMA public`;
-  await sql`GRANT ALL ON SCHEMA public TO public`;
+  await sql`DROP TABLE IF EXISTS sessions CASCADE`;
+  await sql`DROP TABLE IF EXISTS article_translations CASCADE`;
+  await sql`DROP TABLE IF EXISTS articles CASCADE`;
+  await sql`DROP TABLE IF EXISTS users CASCADE`;
+  await sql`DROP TABLE IF EXISTS settings CASCADE`;
+  await sql`DROP TABLE IF EXISTS pgmigrations CASCADE`;
 }
 
 describe('Database migrations', () => {

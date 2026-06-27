@@ -15,6 +15,8 @@ export default defineConfig({
           name: 'integration',
           include: ['src/**/*.integration.test.ts'],
           testTimeout: 30_000,
+          pool: 'forks',
+          poolOptions: { forks: { singleFork: true } },
         },
       },
     ],
