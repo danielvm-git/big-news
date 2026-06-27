@@ -1,0 +1,110 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+---
+
+<Layout>
+  <main class="admin-page">
+    <header class="admin-header">
+      <h1 id="page-title">Edit Article</h1>
+      <nav class="admin-nav">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/articles">Articles</a>
+        <a href="/admin/settings">Settings</a>
+      </nav>
+    </header>
+
+    <form id="article-form">
+      <label>Title (English) <input type="text" name="title" id="field-title" required /></label>
+      <label>Category <input type="text" name="category" id="field-category" /></label>
+      <label
+        >Status
+        <select name="status" id="field-status">
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+          <option value="archived">Archived</option>
+        </select>
+      </label>
+      <label>Excerpt <textarea name="excerpt" id="field-excerpt" rows="3"></textarea></label>
+      <label>Content <textarea name="content" id="field-content" rows="20"></textarea></label>
+      <button type="submit">Save</button>
+    </form>
+  </main>
+</Layout>
+
+<script>
+  const id = window.location.pathname.split('/')[3];
+
+  async function loadArticle() {
+    const res = await fetch(`/api/admin/articles/${id}`);
+    if (!res.ok) {
+      window.location.href = '/admin/articles';
+      return;
+    }
+    const data = await res.json();
+    const a = data.article;
+    const t = data.translations?.find((t: any) => t.language === 'en');
+
+    (document.getElementById('field-title') as HTMLInputElement).value = t?.title ?? '';
+    (document.getElementById('field-category') as HTMLInputElement).value = a.category ?? '';
+    (document.getElementById('field-status') as HTMLSelectElement).value = a.status ?? 'draft';
+    (document.getElementById('field-excerpt') as HTMLTextAreaElement).value = t?.excerpt ?? '';
+    (document.getElementById('field-content') as HTMLTextAreaElement).value = t?.content ?? '';
+  }
+
+  document.getElementById('article-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const data = new FormData(form);
+
+    await fetch(`/api/admin/articles/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        category: data.get('category'),
+        status: data.get('status'),
+      }),
+    });
+
+    alert('Saved!');
+  });
+
+  loadArticle();
+</script>
+
+<style>
+  .admin-page {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .admin-nav {
+    display: flex;
+    gap: 1rem;
+  }
+  label {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  input,
+  textarea,
+  select {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    box-sizing: border-box;
+  }
+  button {
+    padding: 0.75rem 1.5rem;
+    background: #000;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+</style>

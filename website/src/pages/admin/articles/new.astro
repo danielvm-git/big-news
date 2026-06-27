@@ -1,0 +1,87 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+---
+
+<Layout>
+  <main class="admin-page">
+    <header class="admin-header">
+      <h1>New Article</h1>
+      <nav class="admin-nav">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/articles">Articles</a>
+        <a href="/admin/settings">Settings</a>
+      </nav>
+    </header>
+
+    <form id="article-form">
+      <label>Title (English) <input type="text" name="title" required /></label>
+      <label>Slug <input type="text" name="slug" placeholder="auto-generated" /></label>
+      <label>Category <input type="text" name="category" value="general" /></label>
+      <label>Excerpt <textarea name="excerpt" rows="3"></textarea></label>
+      <label>Content <textarea name="content" rows="20"></textarea></label>
+      <button type="submit">Create Article</button>
+    </form>
+  </main>
+</Layout>
+
+<script>
+  document.getElementById('article-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const data = new FormData(form);
+
+    const res = await fetch('/api/admin/articles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: data.get('title'),
+        slug: data.get('slug') || undefined,
+        category: data.get('category'),
+        excerpt: data.get('excerpt'),
+        content: data.get('content'),
+      }),
+    });
+
+    if (res.ok) {
+      const article = await res.json();
+      window.location.href = `/admin/articles/${article.id}/edit`;
+    }
+  });
+</script>
+
+<style>
+  .admin-page {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .admin-nav {
+    display: flex;
+    gap: 1rem;
+  }
+  label {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  input,
+  textarea {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    box-sizing: border-box;
+  }
+  button {
+    padding: 0.75rem 1.5rem;
+    background: #000;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+</style>

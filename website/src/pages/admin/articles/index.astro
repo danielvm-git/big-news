@@ -1,0 +1,122 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+---
+
+<Layout>
+  <main class="admin-page">
+    <header class="admin-header">
+      <h1>Articles</h1>
+      <nav class="admin-nav">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/articles">Articles</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="/api/auth/logout" id="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <a href="/admin/articles/new" class="btn-primary">Create Article</a>
+
+    <table id="articles-table">
+      <thead
+        ><tr><th>Title</th><th>Status</th><th>Language</th><th>Date</th><th>Actions</th></tr></thead
+      >
+      <tbody id="articles-body"></tbody>
+    </table>
+
+    <p id="empty-state" hidden>
+      No articles yet. <a href="/admin/articles/new">Create your first article</a>.
+    </p>
+  </main>
+</Layout>
+
+<script>
+  async function loadArticles() {
+    const res = await fetch('/api/admin/articles');
+    if (!res.ok) return;
+    const data = await res.json();
+
+    if (data.articles.length === 0) {
+      document.getElementById('empty-state')!.hidden = false;
+      document.getElementById('articles-table')!.hidden = true;
+      return;
+    }
+
+    const tbody = document.getElementById('articles-body')!;
+    tbody.innerHTML = data.articles
+      .map(
+        (a: any) => `
+      <tr>
+        <td><a href="/admin/articles/${a.id}/edit">${a.title ?? '(no title)'}</a></td>
+        <td>${a.status}</td>
+        <td>en</td>
+        <td>${new Date(a.created_at).toLocaleDateString()}</td>
+        <td><button data-id="${a.id}" class="btn-delete">Delete</button></td>
+      </tr>
+    `
+      )
+      .join('');
+
+    tbody.querySelectorAll('.btn-delete').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const id = (btn as HTMLElement).dataset.id;
+        if (confirm('Delete this article?')) {
+          await fetch(`/api/admin/articles/${id}`, { method: 'DELETE' });
+          loadArticles();
+        }
+      });
+    });
+  }
+
+  document.getElementById('logout-link')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/admin/login';
+  });
+
+  loadArticles();
+</script>
+
+<style>
+  .admin-page {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .admin-nav {
+    display: flex;
+    gap: 1rem;
+  }
+  .btn-primary {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+  .btn-delete {
+    background: none;
+    border: 1px solid #c00;
+    color: #c00;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+</style>

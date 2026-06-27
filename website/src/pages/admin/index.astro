@@ -1,0 +1,109 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout>
+  <main class="admin-dashboard">
+    <header class="admin-header">
+      <h1>Dashboard</h1>
+      <nav class="admin-nav">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/articles">Articles</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="/api/auth/logout" id="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <section class="dashboard-stats" id="stats">
+      <div class="stat-card"><h3>Total</h3><p id="stat-total">—</p></div>
+      <div class="stat-card"><h3>Published</h3><p id="stat-published">—</p></div>
+      <div class="stat-card"><h3>Drafts</h3><p id="stat-drafts">—</p></div>
+    </section>
+
+    <section class="dashboard-recent">
+      <h2>Recent Articles</h2>
+      <table id="recent-table">
+        <thead><tr><th>Title</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="recent-body"></tbody>
+      </table>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  async function loadDashboard() {
+    const res = await fetch('/api/admin/dashboard');
+    if (!res.ok) return;
+    const data = await res.json();
+
+    document.getElementById('stat-total')!.textContent = String(data.stats.total);
+    document.getElementById('stat-published')!.textContent = String(data.stats.published);
+    document.getElementById('stat-drafts')!.textContent = String(data.stats.drafts);
+
+    const tbody = document.getElementById('recent-body')!;
+    tbody.innerHTML = data.recent
+      .map(
+        (a: any) => `
+      <tr>
+        <td><a href="/admin/articles/${a.id}/edit">${a.title}</a></td>
+        <td>${a.status}</td>
+        <td>${new Date(a.created_at).toLocaleDateString()}</td>
+      </tr>
+    `
+      )
+      .join('');
+  }
+
+  document.getElementById('logout-link')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/admin/login';
+  });
+
+  loadDashboard();
+</script>
+
+<style>
+  .admin-dashboard {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .admin-nav {
+    display: flex;
+    gap: 1rem;
+  }
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: #f5f5f5;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .stat-card p {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+</style>

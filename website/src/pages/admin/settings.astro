@@ -1,0 +1,113 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout>
+  <main class="admin-page">
+    <header class="admin-header">
+      <h1>Settings</h1>
+      <nav class="admin-nav">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/articles">Articles</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="/api/auth/logout" id="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <form id="settings-form">
+      <label>Site Name <input type="text" name="site_name" id="field-site-name" /></label>
+      <label>Tagline <input type="text" name="tagline" id="field-tagline" /></label>
+      <label
+        >Description <textarea name="description" id="field-description" rows="3"></textarea></label
+      >
+      <label>Logo URL <input type="url" name="logo_url" id="field-logo-url" /></label>
+      <label>Favicon URL <input type="url" name="favicon_url" id="field-favicon-url" /></label>
+      <label
+        >Locale
+        <select name="locale" id="field-locale">
+          <option value="en">English</option>
+          <option value="pt-br">Português (Brasil)</option>
+        </select>
+      </label>
+      <button type="submit">Save Settings</button>
+    </form>
+  </main>
+</Layout>
+
+<script>
+  async function loadSettings() {
+    const res = await fetch('/api/admin/settings');
+    if (!res.ok) return;
+    const s = await res.json();
+    if (s.site_name)
+      (document.getElementById('field-site-name') as HTMLInputElement).value = s.site_name;
+    if (s.tagline) (document.getElementById('field-tagline') as HTMLInputElement).value = s.tagline;
+    if (s.description)
+      (document.getElementById('field-description') as HTMLTextAreaElement).value = s.description;
+    if (s.logo_url)
+      (document.getElementById('field-logo-url') as HTMLInputElement).value = s.logo_url;
+    if (s.favicon_url)
+      (document.getElementById('field-favicon-url') as HTMLInputElement).value = s.favicon_url;
+    if (s.locale) (document.getElementById('field-locale') as HTMLSelectElement).value = s.locale;
+  }
+
+  document.getElementById('settings-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const data = new FormData(form);
+
+    await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.fromEntries(data)),
+    });
+
+    alert('Settings saved!');
+  });
+
+  document.getElementById('logout-link')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/admin/login';
+  });
+
+  loadSettings();
+</script>
+
+<style>
+  .admin-page {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .admin-nav {
+    display: flex;
+    gap: 1rem;
+  }
+  label {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  input,
+  textarea,
+  select {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    box-sizing: border-box;
+  }
+  button {
+    padding: 0.75rem 1.5rem;
+    background: #000;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+</style>
