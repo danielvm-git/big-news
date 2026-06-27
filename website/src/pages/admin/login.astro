@@ -1,0 +1,80 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout>
+  <main class="admin-login">
+    <h1>Admin Login</h1>
+    <form id="login-form" method="post" action="/api/auth/login">
+      <label>
+        Email
+        <input type="email" name="email" required autocomplete="email" />
+      </label>
+      <label>
+        Password
+        <input type="password" name="password" required autocomplete="current-password" />
+      </label>
+      <button type="submit">Sign In</button>
+      <p id="login-error" class="error" hidden>Invalid credentials</p>
+    </form>
+  </main>
+</Layout>
+
+<script>
+  document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const errorEl = document.getElementById('login-error')!;
+    const data = new FormData(form);
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.get('email'),
+          password: data.get('password'),
+        }),
+      });
+
+      if (res.ok) {
+        window.location.href = '/admin';
+      } else {
+        errorEl.hidden = false;
+      }
+    } catch {
+      errorEl.hidden = false;
+    }
+  });
+</script>
+
+<style>
+  .admin-login {
+    max-width: 24rem;
+    margin: 4rem auto;
+    padding: 2rem;
+  }
+  .admin-login label {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  .admin-login input {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    box-sizing: border-box;
+  }
+  .admin-login button {
+    width: 100%;
+    padding: 0.75rem;
+    background: #000;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  .error {
+    color: #c00;
+    margin-top: 1rem;
+  }
+</style>
