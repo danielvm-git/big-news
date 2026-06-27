@@ -1,7 +1,7 @@
 active_flow: build_epic # building e02 via build-epic cycle
 workflow_mode: yolo # full auto-run through end of e02 (user requested)
 active_epic_id: e02
-active_story_id: e02s02
+active_story_id: e02s03
 completed_epic: false
 project_cycle:
   current_phase: build # discover → elaborate → plan → build → deploy → support
@@ -11,22 +11,17 @@ project_cycle:
     - 3 # plan
   next_skill: build-epic
 epic_cycle:
-  # e02s01 complete! Next: e02s02 — PostgreSQL connection (postgres.js)
-  current_step: 8 # step 8: release-branch
-  next_skill: release-branch
-  story_bcps: 1 # e02s02 (1 BCP)
+  # e02s02 complete! Next: e02s03 — Schema + versioned migrations (node-pg-migrate)
+  current_step: 3 # step 3: kickoff-branch
+  next_skill: kickoff-branch
+  story_bcps: 2 # e02s03 (2 BCPs)
   completed_steps:
     - 1 # survey-context
-    - 2 # assess-impact (skip — net-new, no dependents) + plan-work
-    - 3 # kickoff-branch
-    - 4 # develop-tdd
-    - 5 # verify-work
-    - 6 # audit-code
-    - 7 # commit-message
+    - 2 # assess-impact (skip) + plan-work
   fast_mode: false
-  audit_result: pass # e02s02 audit passed
-  last_story_done: e02s01 # released to main as 55ec74a
-  next_story: e02s02 # PostgreSQL connection (postgres.js)
+  audit_result: pass
+  last_story_done: e02s02 # PostgreSQL connection (postgres.js)
+  next_story: e02s03 # Schema + versioned migrations (node-pg-migrate)
 stack:
   package_manager: npm # pure npm — package-lock.json
   site_dir: website # Astro site lives here
@@ -51,17 +46,15 @@ upstream:
 handoff:
   e02_planned: >
     e02 capsule created at specs/epics/e02-postgres-data-layer/ — epic.yaml manifest (7 stories,
-    8 BCPs), full spec e02s01-adapter-seam.md, and runnable e02s01..e02s07-tasks.yaml (npm-adapted
-    verify cmds). Build order: s01 interface → s02 connection → s03 schema/migrations →
-    [s04 article ‖ s05 settings ‖ s06 storage ‖ s07 sanitizer]. Slopcheck all [OK]
-    (postgres already installed; node-pg-migrate, @aws-sdk/client-s3, sanitize-html to add).
+    8 BCPs). Build order: s01 interface → s02 connection → s03 schema/migrations →
+    [s04 article ‖ s05 settings ‖ s06 storage ‖ s07 sanitizer].
   last_step_completed: >
-    e02s01 complete! StorageAdapter interface shipped:
-    Implemented domain types (ArticleData, TranslationData, UserData,
-    SettingsData, SessionData), sub-adapter interfaces (ArticleAdapter,
-    AuthAdapter, FileStorageAdapter, SettingsAdapter), composed
-    StorageAdapter, full in-memory MockAdapter, and 31 contract tests.
-    Released to main as 55ec74a via build-epic cycle.
-  next_action: "build-epic step 1: survey-context for e02s02"
+    e02s02 complete! PostgreSQL connection module shipped:
+    - getDb()/closeDb()/resetDb() with lazy singleton postgres.js client
+    - SSL auto-detection (PGSSLMODE env, ?sslmode= URL param)
+    - Fail-fast on missing DATABASE_URL
+    - 7 integration tests validated against Neon (cloud Postgres)
+    Released to main via build-epic cycle.
+  next_action: "build-epic step 1: survey-context for e02s03"
   next_skill: survey-context
-  notes: "e02s01 complete! s02–s07 tasks.yaml already runnable. s02: PostgreSQL connection."
+  notes: "e02s02 complete! Next: e02s03 — Schema + versioned migrations (node-pg-migrate). s03–s07 tasks.yaml already runnable."
