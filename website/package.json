@@ -17,12 +17,15 @@
     "test:integration": "vitest run --project integration",
     "test:e2e": "playwright test",
     "test": "vitest run",
+    "migrate": "node-pg-migrate up",
+    "migrate:down": "node-pg-migrate down",
     "preflight": "npm run typecheck && npm run format:check && npm run test:unit && npm run build"
   },
   "dependencies": {
     "@astrojs/node": "^11.0.0",
     "@astrojs/react": "^6.0.0",
     "astro": "^7.0.0",
+    "node-pg-migrate": "^8.0.4",
     "postgres": "^3.4.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
