@@ -12,12 +12,19 @@ project_cycle:
   next_skill: build-epic
 epic_cycle:
   # e02s01 complete! Next: e02s02 — PostgreSQL connection (postgres.js)
-  current_step: 0 # reset for e02s02
-  next_skill: kickoff-branch
-  story_bcps: 1 # e02s01 (1 BCP)
-  completed_steps: []
+  current_step: 8 # step 8: release-branch
+  next_skill: release-branch
+  story_bcps: 1 # e02s02 (1 BCP)
+  completed_steps:
+    - 1 # survey-context
+    - 2 # assess-impact (skip — net-new, no dependents) + plan-work
+    - 3 # kickoff-branch
+    - 4 # develop-tdd
+    - 5 # verify-work
+    - 6 # audit-code
+    - 7 # commit-message
   fast_mode: false
-  audit_result: pass
+  audit_result: pass # e02s02 audit passed
   last_story_done: e02s01 # released to main as 55ec74a
   next_story: e02s02 # PostgreSQL connection (postgres.js)
 stack:
