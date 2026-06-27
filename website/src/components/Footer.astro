@@ -1,4 +1,6 @@
 ---
+import LanguageSwitcher from './LanguageSwitcher.astro';
+
 const year = new Date().getFullYear();
 const version = import.meta.env.PUBLIC_APP_VERSION ?? '0.0.0';
 ---
@@ -31,9 +33,14 @@ const version = import.meta.env.PUBLIC_APP_VERSION ?? '0.0.0';
     </div>
   </div>
   <div class="footer-bottom">
-    &copy; {year} big-news &middot; MIT License &middot; v{version}
-    &mdash; Built with <a href="https://github.com/danielvm-git/bigpowers">BigPowers</a> by <a
-      href="https://github.com/danielvm-git">danielvm-git</a
-    >
+    <div class="footer-bottom-content">
+      <span>&copy; {year} big-news &middot; MIT License &middot; v{version}</span>
+      <LanguageSwitcher />
+    </div>
+    <div class="footer-built-with">
+      Built with <a href="https://github.com/danielvm-git/bigpowers">BigPowers</a> by <a
+        href="https://github.com/danielvm-git">danielvm-git</a
+      >
+    </div>
   </div>
 </footer>

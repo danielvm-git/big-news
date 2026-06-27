@@ -1,0 +1,57 @@
+---
+const localeLabels: Record<string, string> = {
+  en: 'English',
+  'pt-br': 'Português (Brasil)',
+};
+
+const currentLocale = Astro.currentLocale ?? 'en';
+const locales = ['en', 'pt-br'];
+
+// For prefixDefaultLocale: false, 'en' is at root, 'pt-br' is prefixed
+function localePath(locale: string): string {
+  if (locale === 'en') return '/';
+  return `/${locale}/`;
+}
+---
+
+{
+  locales.length > 1 ? (
+    <nav class="language-switcher" aria-label="Language selector">
+      {locales.map((locale) => (
+        <a
+          href={localePath(locale)}
+          class:list={{
+            'language-switcher__link': true,
+            'language-switcher__link--active': locale === currentLocale,
+          }}
+          aria-current={locale === currentLocale ? 'page' : undefined}
+        >
+          {localeLabels[locale] ?? locale}
+        </a>
+      ))}
+    </nav>
+  ) : null
+}
+
+<style>
+  .language-switcher {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .language-switcher__link {
+    text-decoration: none;
+    font-size: 0.875rem;
+    color: var(--color-text-muted, #666);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: color 0.2s;
+  }
+  .language-switcher__link:hover {
+    color: var(--color-text, #000);
+  }
+  .language-switcher__link--active {
+    font-weight: 600;
+    color: var(--color-text, #000);
+  }
+</style>

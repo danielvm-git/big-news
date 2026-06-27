@@ -1,0 +1,19 @@
+id: e06
+title: "i18n Polish (switcher, localized UI strings)"
+wsjf: 2.5
+total_bcps: 2
+status: building
+stories:
+  - id: e06s01
+    title: Language switcher
+    bcps: 1
+    status: todo
+    tasks: e06s01-tasks.yaml
+  - id: e06s02
+    title: Localized UI strings
+    bcps: 1
+    status: todo
+    tasks: e06s02-tasks.yaml
+build_order:
+  - e06s01
+  - e06s02

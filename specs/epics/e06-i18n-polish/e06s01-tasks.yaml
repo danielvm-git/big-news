@@ -1,0 +1,15 @@
+story_id: e06s01
+title: Language switcher
+bcps: 1
+steps:
+  - id: 1
+    do: >
+      Create website/src/components/LanguageSwitcher.astro that reads the current
+      locale from Astro.params and renders links to the same page path in other
+      available locales (en, pt-br). Shows as a simple inline list.
+    verify: "test -f website/src/components/LanguageSwitcher.astro && grep -q 'pt-br' website/src/components/LanguageSwitcher.astro"
+  - id: 2
+    do: >
+      Add LanguageSwitcher to the site footer (website/src/components/Footer.astro)
+      and/or header layout, using available locales from astro:i18n config.
+    verify: "grep -q 'LanguageSwitcher' website/src/components/Footer.astro"
