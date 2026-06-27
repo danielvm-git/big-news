@@ -1,0 +1,11 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { t } from '../../lib/i18n';
+---
+
+<PageLayout title={t('nav.articles', 'pt-br')} locale="pt-br">
+  <slot name="header">
+    <h1>{t('nav.articles', 'pt-br')}</h1>
+  </slot>
+  <p>{t('article.no_articles', 'pt-br')}</p>
+</PageLayout>

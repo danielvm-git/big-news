@@ -1,0 +1,13 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import { t } from '../lib/i18n';
+---
+
+<PageLayout title={t('nav.search', 'en')}>
+  <slot name="header"><h1>{t('nav.search', 'en')}</h1></slot>
+  <form action="/search" method="get" role="search">
+    <input type="search" name="q" placeholder={t('search.placeholder', 'en')} />
+    <button type="submit">{t('nav.search', 'en')}</button>
+  </form>
+  <p>{t('search.no_results', 'en')}</p>
+</PageLayout>

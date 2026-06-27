@@ -1,0 +1,29 @@
+---
+import Layout from './Layout.astro';
+
+export interface Props {
+  title: string;
+  description?: string;
+  locale?: string;
+}
+
+const { title, description, locale = 'en' } = Astro.props;
+---
+
+<Layout>
+  <main class="page">
+    <article>
+      <slot name="header" />
+      <slot />
+    </article>
+  </main>
+</Layout>
+
+<style>
+  .page {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    min-height: calc(100vh - 200px);
+  }
+</style>

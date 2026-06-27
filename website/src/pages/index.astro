@@ -1,8 +1,27 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import LocaleSmoke from '../components/LocaleSmoke.astro';
 ---
 
 <Layout>
-  <LocaleSmoke />
+  <main class="home">
+    <section class="hero">
+      <h1>big-news</h1>
+      <p class="hero-tagline">An open-source PostgreSQL news CMS</p>
+    </section>
+  </main>
 </Layout>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 4rem 1rem;
+  }
+  .hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .hero-tagline {
+    color: #666;
+    font-size: 1.125rem;
+  }
+</style>
