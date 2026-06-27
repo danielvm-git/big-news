@@ -12,12 +12,16 @@ project_cycle:
   next_skill: build-epic
 epic_cycle:
   # e02s02 complete! Next: e02s03 — Schema + versioned migrations (node-pg-migrate)
-  current_step: 3 # step 3: kickoff-branch
-  next_skill: kickoff-branch
+  current_step: 7 # step 7: commit-message
+  next_skill: commit-message
   story_bcps: 2 # e02s03 (2 BCPs)
   completed_steps:
     - 1 # survey-context
     - 2 # assess-impact (skip) + plan-work
+    - 3 # kickoff-branch
+    - 4 # develop-tdd
+    - 5 # verify-work
+    - 6 # audit-code
   fast_mode: false
   audit_result: pass
   last_story_done: e02s02 # PostgreSQL connection (postgres.js)
