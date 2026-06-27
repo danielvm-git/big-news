@@ -73,7 +73,7 @@ stories:
 
   - id: e02s03
     title: "Schema + versioned migrations (node-pg-migrate)"
-    status: planned
+    status: done
     bcps: 2
     tasks_file: e02s03-tasks.yaml
     acceptance: |

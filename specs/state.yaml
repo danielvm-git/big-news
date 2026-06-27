@@ -1,7 +1,7 @@
 active_flow: build_epic # building e02 via build-epic cycle
 workflow_mode: yolo # full auto-run through end of e02 (user requested)
 active_epic_id: e02
-active_story_id: e02s03
+active_story_id: e02s04
 completed_epic: false
 project_cycle:
   current_phase: build # discover → elaborate → plan → build → deploy → support
@@ -11,21 +11,15 @@ project_cycle:
     - 3 # plan
   next_skill: build-epic
 epic_cycle:
-  # e02s02 complete! Next: e02s03 — Schema + versioned migrations (node-pg-migrate)
-  current_step: 7 # step 7: commit-message
-  next_skill: commit-message
-  story_bcps: 2 # e02s03 (2 BCPs)
-  completed_steps:
-    - 1 # survey-context
-    - 2 # assess-impact (skip) + plan-work
-    - 3 # kickoff-branch
-    - 4 # develop-tdd
-    - 5 # verify-work
-    - 6 # audit-code
+  # e02s03 complete! Next: e02s04 — PostgreSQL article adapter
+  current_step: 1 # step 1: survey-context
+  next_skill: survey-context
+  story_bcps: 1 # e02s04 (1 BCP)
+  completed_steps: []
   fast_mode: false
   audit_result: pass
-  last_story_done: e02s02 # PostgreSQL connection (postgres.js)
-  next_story: e02s03 # Schema + versioned migrations (node-pg-migrate)
+  last_story_done: e02s03 # Schema + versioned migrations
+  next_story: e02s04 # PostgreSQL article adapter
 stack:
   package_manager: npm # pure npm — package-lock.json
   site_dir: website # Astro site lives here
@@ -53,12 +47,14 @@ handoff:
     8 BCPs). Build order: s01 interface → s02 connection → s03 schema/migrations →
     [s04 article ‖ s05 settings ‖ s06 storage ‖ s07 sanitizer].
   last_step_completed: >
-    e02s02 complete! PostgreSQL connection module shipped:
-    - getDb()/closeDb()/resetDb() with lazy singleton postgres.js client
-    - SSL auto-detection (PGSSLMODE env, ?sslmode= URL param)
-    - Fail-fast on missing DATABASE_URL
-    - 7 integration tests validated against Neon (cloud Postgres)
+    e02s03 complete! Schema + versioned migrations shipped:
+    - node-pg-migrate integrated via runMigrations()
+    - npm scripts: migrate / migrate:down
+    - Initial migration: 5 tables (articles, article_translations,
+      users, settings, sessions) with UUID PKs, FK CASCADE, CHECK
+      constraints, GIN FTS index
+    - 3 integration tests on Neon
     Released to main via build-epic cycle.
-  next_action: "build-epic step 1: survey-context for e02s03"
+  next_action: "build-epic step 1: survey-context for e02s04"
   next_skill: survey-context
-  notes: "e02s02 complete! Next: e02s03 — Schema + versioned migrations (node-pg-migrate). s03–s07 tasks.yaml already runnable."
+  notes: "e02s03 complete! s04–s07 tasks.yaml already runnable. Next: s04 — PostgreSQL article adapter."

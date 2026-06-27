@@ -2,7 +2,7 @@
 # populate each capsule and develop-tdd ships stories. Stories appear here once sliced.
 development_status:
   e01: done # all 7 stories complete, capsule archived
-  e02: building # s01 done (StorageAdapter interface), s02 done (PostgreSQL connection), s03–s07 to go
+  e02: building # s01 done, s02 done, s03 done (schema migrations), s04–s07 to go
   e03: not-started
   e04: not-started
   e05: not-started
