@@ -23,3 +23,9 @@
   end: "2026-06-27T00:29:00Z"
   cycle_minutes: 11
   bcp_per_hour: 5.45
+- id: e08s02
+  bcps: 3
+  start: "2026-06-27T10:57:00Z"
+  end: "2026-06-27T11:15:00Z"
+  cycle_minutes: 18
+  bcp_per_hour: 10.0
