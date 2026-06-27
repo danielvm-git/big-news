@@ -2,11 +2,11 @@
 # populate each capsule and develop-tdd ships stories. Stories appear here once sliced.
 development_status:
   e01: done # all 7 stories complete, capsule archived
-  e02: building # s01 done, s02 done, s03 done, s04 done (article adapter), s05–s07 to go
+  e02: done # all 7 stories complete
   e03: not-started
-  e04: not-started
-  e05: not-started
-  e06: not-started
-  e07: not-started
+  e04: done
+  e05: done
+  e06: done
+  e07: done
   e08: not-started
   e09: not-started
